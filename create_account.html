@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LearnHub — AI Learning Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #03060f;
+    --surface: #070d1a;
+    --surface2: #0b1224;
+    --border: #131d35;
+    --border2: #1c2a45;
+    --cyan: #00e5ff;
+    --blue: #2979ff;
+    --violet: #651fff;
+    --green: #00e676;
+    --amber: #ffab00;
+    --red: #ff1744;
+    --text: #e2e8f8;
+    --text2: #7a8ab0;
+    --text3: #3a4a6a;
+    --font: 'Outfit', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    overflow: hidden;
+  }
+
+  /* ── CANVAS BACKGROUND ── */
+  #bg-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+
+  /* ── LAYOUT ── */
+  #app {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── LEFT PANEL ── */
+  #left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 64px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .brand-icon {
+    width: 46px; height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 28px #00e5ff33;
+  }
+
+  .brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .brand-name span { color: var(--cyan); }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    opacity: 0.8;
+    animation: fadeUp 0.7s 0.1s ease both;
+    opacity: 0;
+  }
+
+  .hero-title {
+    font-size: clamp(38px, 3.5vw, 58px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    color: var(--text);
+    margin-bottom: 22px;
+    animation: fadeUp 0.7s 0.2s ease both;
+    opacity: 0;
+  }
+
+  .hero-title .grad {
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--blue) 50%, var(--violet) 100%);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.75;
+    max-width: 380px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.7s 0.3s ease both;
+    opacity: 0;
+  }
+
+  /* Feature pills */
+  .features-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 56px;
+    animation: fadeUp 0.7s 0.4s ease both;
+    opacity: 0;
+  }
+
+  .feat-pill {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 16px;
+    border-radius: 40px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    cursor: default;
+    transition: all 0.3s;
+  }
+
+  .feat-pill:hover {
+    border-color: var(--cyan);
+    background: #00e5ff08;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px #00e5ff12;
+  }
+
+  .feat-pill .icon { font-size: 15px; }
+  .feat-pill .label { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 48px;
+    animation: fadeUp 0.7s 0.5s ease both;
+    opacity: 0;
+  }
+
+  .stat-item .num {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+
+  .stat-item .lbl {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  /* Floating notification card */
+  .notif-card {
+    position: absolute;
+    bottom: 60px;
+    right: -20px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 24px 64px #00000088;
+    animation: floatCard 6s ease-in-out infinite;
+  }
+
+  .notif-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--amber), #ff6d00);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .notif-text .name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .notif-text .sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ── RIGHT PANEL ── */
+  #right-panel {
+    width: 480px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 44px;
+    position: relative;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  #right-panel::-webkit-scrollbar { width: 3px; }
+  #right-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px;
+    margin-bottom: 32px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.2px;
+  }
+
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--cyan);
+    box-shadow: 0 2px 12px #00000044;
+  }
+
+  /* Section headings */
+  .form-heading {
+    margin-bottom: 28px;
+  }
+
+  .form-heading h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 5px;
+  }
+
+  .form-heading p {
+    font-size: 14px;
+    color: var(--text3);
+  }
+
+  /* Inputs */
+  .field { margin-bottom: 16px; }
+
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .input-wrap { position: relative; }
+
+  .input-wrap .icon-left {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 13px 16px 13px 42px;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .input-wrap input:focus {
+    border-color: #00e5ff66;
+    box-shadow: 0 0 0 3px #00e5ff12;
+  }
+
+  .input-wrap input.err { border-color: var(--red); }
+  .input-wrap input::placeholder { color: var(--text3); }
+
+  .input-wrap .eye-btn {
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text3);
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .input-wrap .eye-btn:hover { color: var(--text); }
+
+  .field-error {
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 5px;
+    padding-left: 4px;
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  .forgot {
+    text-align: right;
+    margin-top: -8px;
+    margin-bottom: 16px;
+  }
+
+  .forgot a {
+    font-size: 12px;
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .forgot a:hover { color: var(--cyan); }
+
+  /* Buttons */
+  .btn-main {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    color: var(--bg);
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-main::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, #ffffff22, transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 32px #00e5ff44; }
+  .btn-main:hover::before { transform: translateX(100%); }
+  .btn-main:active { transform: translateY(0); }
+  .btn-main:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 4px 0;
+  }
+
+  .divider .line { flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 1px; }
+
+  .btn-demo {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-demo:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: #00e5ff08;
+    transform: translateY(-1px);
+  }
+
+  /* Demo hint box */
+  .demo-hint {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: #00e5ff07;
+    border: 1px solid #00e5ff18;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+  }
+
+  .demo-hint .tip-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  .demo-hint .tip-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--cyan);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .demo-hint code {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #5a7090;
+    line-height: 1.9;
+  }
+
+  .terms {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 22px;
+    line-height: 1.7;
+  }
+
+  .terms a { color: var(--blue); text-decoration: none; }
+  .terms a:hover { color: var(--cyan); }
+
+  /* ── SUCCESS SCREEN ── */
+  #success-screen {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  #success-screen.show { display: flex; }
+
+  .success-check {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 0 48px #00e5ff44;
+    margin-bottom: 24px;
+    animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+
+  .success-title {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 8px;
+    animation: fadeUp 0.5s 0.2s ease both; opacity: 0;
+  }
+
+  .success-sub {
+    font-size: 14px;
+    color: var(--text3);
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s 0.3s ease both; opacity: 0;
+  }
+
+  .user-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 26px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.5s 0.35s ease both; opacity: 0;
+  }
+
+  .user-card-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .user-avatar {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue), var(--violet));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  .user-name { font-size: 17px; font-weight: 800; color: var(--text); }
+  .user-email { font-size: 12px; color: var(--text3); font-family: var(--mono); margin-top: 3px; }
+
+  .level-badge {
+    margin-left: auto;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: #00e5ff10;
+    border: 1px solid #00e5ff22;
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .xp-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .xp-label span:last-child { color: var(--cyan); font-family: var(--mono); }
+
+  .xp-bar {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+    border-radius: 3px;
+    width: 0%;
+    transition: width 1.5s 0.8s cubic-bezier(.4,0,.2,1);
+  }
+
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.5s 0.5s ease both; opacity: 0;
+  }
+
+  .nav-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .nav-item:hover {
+    border-color: var(--cyan);
+    background: #00e5ff07;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px #00e5ff14;
+  }
+
+  .nav-item .ni { font-size: 22px; margin-bottom: 7px; }
+  .nav-item .nl { font-size: 10px; font-weight: 700; color: var(--text3); }
+
+  .btn-back {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    padding: 10px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+    animation: fadeUp 0.5s 0.65s ease both; opacity: 0;
+  }
+
+  .btn-back:hover { color: var(--text); border-color: var(--border2); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50% { transform: translateY(-12px) rotate(1deg); }
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.4); opacity: 0; }
+    70% { transform: scale(1.12); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid #050a1444;
+    border-top-color: #050a14;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 860px) {
+    #left-panel { display: none; }
+    #right-panel { width: 100%; min-height: 100vh; border-left: none; padding: 40px 28px; }
+    .notif-card { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="app">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-name">Learn<span>Hub</span></div>
+    </div>
+
+    <div class="hero-tag">AI-Powered Learning Platform</div>
+
+    <h1 class="hero-title">
+      Master Skills<br>
+      <span class="grad">Faster Than Ever.</span>
+    </h1>
+
+    <p class="hero-desc">
+      Join 50,000+ students leveling up with AI-powered quizzes, live leaderboards, a smart dashboard, and a personal AI tutor available 24/7.
+    </p>
+
+    <div class="features-grid">
+      <div class="feat-pill"><span class="icon">📊</span><span class="label">Dashboard</span></div>
+      <div class="feat-pill"><span class="icon">🏆</span><span class="label">Leaderboard</span></div>
+      <div class="feat-pill"><span class="icon">🧠</span><span class="label">Quizzes</span></div>
+      <div class="feat-pill"><span class="icon">👤</span><span class="label">Profile</span></div>
+      <div class="feat-pill"><span class="icon">🤖</span><span class="label">AI Tutor</span></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="num">50K+</div>
+        <div class="lbl">Students</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">200+</div>
+        <div class="lbl">Courses</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">98%</div>
+        <div class="lbl">Satisfaction</div>
+      </div>
+    </div>
+
+    <!-- Floating notification -->
+    <div class="notif-card">
+      <div class="notif-icon">🏆</div>
+      <div class="notif-text">
+        <div class="name">Sarah K. just hit #1 Worldwide!</div>
+        <div class="sub">Python Mastery · 2 minutes ago</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="form-heading">
+        <h2>Welcome back 👋</h2>
+        <p>Sign in to continue your learning journey</p>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <span class="icon-left">✉️</span>
+          <input type="email" id="l-email" placeholder="you@example.com" />
+        </div>
+        <div class="field-error" id="l-email-err">Enter a valid email address</div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="icon-left">🔒</span>
+          <input type="password" id="l-pass" placeholder="••••••••" />
+          <button class="eye-btn" onclick="togglePass('l-pass', this)">👁</button>
+        </div>
+        <div class="field-error" id="l-pass-err">Password must be at least 6 characters</div>
+      </div>
+
+      <div class="forgot"><a href="#">Forgot password?</a></div>
+
+      <button class="btn-main" id="btn-login" onclick="handleLogin()">Sign In →</button>
+
+      <div class="divider">
+        <div class="line"></div>
+        <span>OR</span>
+        <div class="line"></div>
+      </div>
+
+      <button class="btn-demo" onclick="handleDemo()">
+        🚀 Try Demo Account — Free
+      </button>
+
+      <div class="demo-hint">
+        <div class="tip-icon">💡</div>
+        <div>
+          <div class="tip-title">Demo Credentials</div>
+          <code>
+            Email: demo@learnhub.ai<br>
+            Pass:&nbsp;&nbsp;demo1234
+          </code>
+        </div>
+      </div>
+
+      <p class="terms">
+        By signing in you agree to our
+        <a href="#">Terms of Service</a> and
+        <a href="#">Privacy Policy</a>
+      </p>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="form-signup" style="display:none;">
+      <div class="form-heading">
+        <h2>Create account ✨</h2>
+        <p>Start your learning journey for free today</p>
+      </div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <span class="icon-left">👤</span>
+          <input type="text" id="s-name" placeholder="Alex Rivera" />
+        </div>
+        <div class="field-error" id="s-name-err">Name is required</div>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <span class="icon-left">✉️</span>
+          <input type="email" id="s-email" placeholder="you@example.com" />
+        </div>
+        <div class="field-error" id="s-email-err">Enter a valid email address</div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="icon-left">🔒</span>
+          <input type="password" id="s-pass" placeholder="Min 6 characters" />
+          <button class="eye-btn" onclick="togglePass('s-pass', this)">👁</button>
+        </div>
+        <div class="field-error" id="s-pass-err">Password must be at least 6 characters</div>
+      </div>
+
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="input-wrap">
+          <span class="icon-left">🔑</span>
+          <input type="password" id="s-confirm" placeholder="Repeat password" />
+          <button class="eye-btn" onclick="togglePass('s-confirm', this)">👁</button>
+        </div>
+        <div class="field-error" id="s-confirm-err">Passwords do not match</div>
+      </div>
+
+      <button class="btn-main" id="btn-signup" onclick="handleSignup()" style="margin-top:6px;">
+        Create Account →
+      </button>
+
+      <div class="divider">
+        <div class="line"></div>
+        <span>OR</span>
+        <div class="line"></div>
+      </div>
+
+      <button class="btn-demo" onclick="handleDemo()">
+        🚀 Try Demo Account — Free
+      </button>
+
+      <p class="terms">
+        By signing up you agree to our
+        <a href="#">Terms of Service</a> and
+        <a href="#">Privacy Policy</a>
+      </p>
+    </div>
+
+  </div><!-- /right-panel -->
+</div><!-- /app -->
+
+<!-- SUCCESS SCREEN -->
+<div id="success-screen">
+  <div class="success-check">✓</div>
+
+  <div class="success-title" id="s-welcome">Welcome, Alex!</div>
+  <div class="success-sub">Your AI learning journey starts right now 🎉</div>
+
+  <div class="user-card">
+    <div class="user-card-top">
+      <div class="user-avatar" id="s-avatar">A</div>
+      <div>
+        <div class="user-name" id="s-uname">Alex Rivera</div>
+        <div class="user-email" id="s-uemail">alex@example.com</div>
+      </div>
+      <div class="level-badge">Lv. 12</div>
+    </div>
+    <div class="xp-label">
+      <span>XP Progress</span>
+      <span>4,820 / 7,000</span>
+    </div>
+    <div class="xp-bar">
+      <div class="xp-fill" id="xp-fill"></div>
+    </div>
+  </div>
+
+  <div class="nav-grid">
+    <div class="nav-item"><div class="ni">📊</div><div class="nl">Dashboard</div></div>
+    <div class="nav-item"><div class="ni">🏆</div><div class="nl">Leaderboard</div></div>
+    <div class="nav-item"><div class="ni">🧠</div><div class="nl">Quizzes</div></div>
+    <div class="nav-item"><div class="ni">👤</div><div class="nl">Profile</div></div>
+    <div class="nav-item"><div class="ni">🤖</div><div class="nl">AI Tutor</div></div>
+  </div>
+
+  <button class="btn-back" onclick="goBack()">← Back to Login</button>
+</div>
+
+<script>
+/* ── CANVAS PARTICLE BG ── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function createParticles() {
+  particles = [];
+  const count = Math.floor((W * H) / 18000);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      alpha: Math.random() * 0.5 + 0.1,
+    });
+  }
+}
+
+function drawBg() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Gradient mesh
+  const g1 = ctx.createRadialGradient(W * 0.15, H * 0.2, 0, W * 0.15, H * 0.2, W * 0.45);
+  g1.addColorStop(0, 'rgba(0,113,255,0.08)');
+  g1.addColorStop(1, 'transparent');
+  ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+
+  const g2 = ctx.createRadialGradient(W * 0.85, H * 0.8, 0, W * 0.85, H * 0.8, W * 0.4);
+  g2.addColorStop(0, 'rgba(0,229,255,0.06)');
+  g2.addColorStop(1, 'transparent');
+  ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+
+  const g3 = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, W * 0.35);
+  g3.addColorStop(0, 'rgba(101,31,255,0.04)');
+  g3.addColorStop(1, 'transparent');
+  ctx.fillStyle = g3; ctx.fillRect(0, 0, W, H);
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(100,180,255,${p.alpha})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(drawBg);
+}
+
+resize(); createParticles(); drawBg();
+window.addEventListener('resize', () => { resize(); createParticles(); });
+
+/* ── TAB SWITCHING ── */
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tab-login').classList.toggle('active', isLogin);
+  document.getElementById('tab-signup').classList.toggle('active', !isLogin);
+  clearErrors();
+}
+
+/* ── TOGGLE PASSWORD ── */
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+/* ── VALIDATION HELPERS ── */
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById(id.replace('-err', '')).classList.add('err');
+}
+
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('input').forEach(e => e.classList.remove('err'));
+}
+
+/* ── LOADING STATE ── */
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading ? `<span class="spinner"></span>${label}` : label;
+}
+
+/* ── LOGIN ── */
+function handleLogin() {
+  clearErrors();
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  let valid = true;
+
+  if (!email || !email.includes('@')) { showErr('l-email-err', 'Enter a valid email address'); valid = false; }
+  if (pass.length < 6) { showErr('l-pass-err', 'Password must be at least 6 characters'); valid = false; }
+  if (!valid) return;
+
+  setLoading('btn-login', true, 'Signing in...');
+  setTimeout(() => {
+    setLoading('btn-login', false, 'Sign In →');
+    const name = email.split('@')[0].replace(/[^a-z]/gi,'').replace(/^\w/, c => c.toUpperCase()) || 'Student';
+    showSuccess({ name, email, avatar: name[0].toUpperCase(), xp: 68 });
+  }, 1400);
+}
+
+/* ── SIGNUP ── */
+function handleSignup() {
+  clearErrors();
+  const name = document.getElementById('s-name').value.trim();
+  const email = document.getElementById('s-email').value.trim();
+  const pass = document.getElementById('s-pass').value;
+  const confirm = document.getElementById('s-confirm').value;
+  let valid = true;
+
+  if (!name) { showErr('s-name-err', 'Full name is required'); valid = false; }
+  if (!email || !email.includes('@')) { showErr('s-email-err', 'Enter a valid email address'); valid = false; }
+  if (pass.length < 6) { showErr('s-pass-err', 'Password must be at least 6 characters'); valid = false; }
+  if (pass !== confirm) { showErr('s-confirm-err', 'Passwords do not match'); valid = false; }
+  if (!valid) return;
+
+  setLoading('btn-signup', true, 'Creating account...');
+  setTimeout(() => {
+    setLoading('btn-signup', false, 'Create Account →');
+    showSuccess({ name, email, avatar: name[0].toUpperCase(), xp: 5 });
+  }, 1400);
+}
+
+/* ── DEMO ── */
+function handleDemo() {
+  document.querySelectorAll('.btn-demo').forEach(b => { b.disabled = true; b.textContent = '⏳ Loading demo...'; });
+  setTimeout(() => {
+    showSuccess({ name: 'Alex Rivera', email: 'demo@learnhub.ai', avatar: 'A', xp: 69 });
+  }, 1200);
+}
+
+/* ── SHOW SUCCESS ── */
+function showSuccess(user) {
+  document.getElementById('s-welcome').textContent = `Welcome, ${user.name.split(' ')[0]}! 🎊`;
+  document.getElementById('s-uname').textContent = user.name;
+  document.getElementById('s-uemail').textContent = user.email;
+  document.getElementById('s-avatar').textContent = user.avatar;
+
+  const screen = document.getElementById('success-screen');
+  screen.classList.add('show');
+
+  // Trigger XP bar
+  setTimeout(() => {
+    document.getElementById('xp-fill').style.width = user.xp + '%';
+  }, 200);
+}
+
+/* ── GO BACK ── */
+function goBack() {
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('xp-fill').style.width = '0%';
+  document.querySelectorAll('.btn-demo').forEach(b => { b.disabled = false; b.innerHTML = '🚀 Try Demo Account — Free'; });
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login').textContent = 'Sign In →';
+  switchTab('login');
+  document.querySelectorAll('input').forEach(i => i.value = '');
+}
+</script>
+</body>
+</html>
