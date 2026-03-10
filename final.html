@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LearnHub — AI Learning Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#03060f;--surface:#070d1a;--surface2:#0b1224;--surface3:#0f172a;
+  --border:#131d35;--border2:#1c2a45;--border3:#243050;
+  --cyan:#00e5ff;--blue:#2979ff;--violet:#7c3aed;--green:#00e676;
+  --amber:#ffab00;--red:#ff1744;--pink:#f472b6;--orange:#ff6d00;
+  --text:#e2e8f8;--text2:#7a8ab0;--text3:#3a4a6a;
+  --font:'Outfit',sans-serif;--mono:'Space Mono',monospace;
+  --sidebar:260px;--radius:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ═══════════════════════════════════════════ AUTH ══════════════════════════════════════════ */
+#auth-page{position:fixed;inset:0;z-index:200;display:flex;background:var(--bg)}
+#auth-page.hidden{display:none}
+canvas#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:1;opacity:.4}
+
+#left-panel{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px 64px;position:relative;overflow:hidden;z-index:2}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:56px;animation:fadeUp .7s ease both}
+.brand-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 28px #00e5ff33}
+.brand-name{font-size:24px;font-weight:800;letter-spacing:-.5px}.brand-name span{color:var(--cyan)}
+.hero-tag{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fadeUp .7s .1s ease both}
+.hero-title{font-size:clamp(36px,3.5vw,54px);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:20px;opacity:0;animation:fadeUp .7s .2s ease both}
+.hero-title .grad{background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+.hero-desc{font-size:15px;color:var(--text2);line-height:1.75;max-width:380px;margin-bottom:44px;opacity:0;animation:fadeUp .7s .3s ease both}
+.features-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:52px;opacity:0;animation:fadeUp .7s .4s ease both}
+.feat-pill{display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:40px;border:1px solid var(--border2);background:var(--surface);cursor:default;transition:all .3s}
+.feat-pill:hover{border-color:var(--cyan);background:#00e5ff08;transform:translateY(-2px);box-shadow:0 8px 24px #00e5ff12}
+.feat-pill .icon{font-size:15px}.feat-pill .lbl{font-size:13px;font-weight:600;color:var(--text2)}
+.stats-row{display:flex;gap:48px;opacity:0;animation:fadeUp .7s .5s ease both}
+.stat-item .num{font-size:28px;font-weight:900;letter-spacing:-1px}
+.stat-item .lbl2{font-size:12px;color:var(--text3);margin-top:3px}
+.notif-card{position:absolute;bottom:60px;right:-20px;background:var(--surface2);border:1px solid var(--border2);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 24px 64px #00000088;animation:floatCard 6s ease-in-out infinite}
+.notif-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--amber),#ff6d00);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.notif-text .nn{font-size:13px;font-weight:700}.notif-text .ns{font-size:11px;color:var(--text3);margin-top:2px}
+
+#right-panel{width:480px;min-height:100vh;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:48px 44px;position:relative;overflow-y:auto;flex-shrink:0;z-index:2}
+.tab-bar{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:4px;margin-bottom:30px}
+.tab-btn{flex:1;padding:10px;background:none;border:none;color:var(--text3);font-family:var(--font);font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;transition:all .25s;letter-spacing:.2px}
+.tab-btn.active{background:var(--surface2);color:var(--cyan);box-shadow:0 2px 12px #00000044}
+.form-heading{margin-bottom:26px}.form-heading h2{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:5px}.form-heading p{font-size:14px;color:var(--text3)}
+.field{margin-bottom:15px}.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.input-wrap{position:relative}.input-wrap .iico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.input-wrap input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;padding:13px 16px 13px 42px;border-radius:12px;outline:none;transition:all .2s}
+.input-wrap input:focus{border-color:#00e5ff66;box-shadow:0 0 0 3px #00e5ff12}
+.input-wrap input.err{border-color:var(--red)}.input-wrap input::placeholder{color:var(--text3)}
+.eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--text3);transition:color .2s}.eye-btn:hover{color:var(--text)}
+.field-error{font-size:11px;color:var(--red);margin-top:5px;padding-left:4px;display:none}.field-error.show{display:block}
+.forgot{text-align:right;margin-top:-8px;margin-bottom:14px}.forgot a{font-size:12px;color:var(--blue);text-decoration:none;font-weight:600}
+.btn-main{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:var(--bg);font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-bottom:12px;letter-spacing:.3px}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 10px 32px #00e5ff44}.btn-main:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.divider{display:flex;align-items:center;gap:12px;margin:4px 0}.divider .line{flex:1;height:1px;background:var(--border)}.divider span{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px}
+.btn-demo{width:100%;padding:13px;border:1px solid var(--border2);border-radius:12px;background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-demo:hover{border-color:var(--cyan);color:var(--cyan);background:#00e5ff08;transform:translateY(-1px)}
+.demo-hint{margin-top:16px;padding:14px 16px;background:#00e5ff07;border:1px solid #00e5ff18;border-radius:12px;display:flex;gap:12px}
+.demo-hint .tip-icon{font-size:15px;flex-shrink:0;margin-top:1px}.demo-hint .tip-title{font-size:11px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.demo-hint code{font-family:var(--mono);font-size:11px;color:#5a7090;line-height:1.9}
+.terms{text-align:center;font-size:11px;color:var(--text3);margin-top:18px;line-height:1.7}.terms a{color:var(--blue);text-decoration:none}
+@media(max-width:860px){#left-panel{display:none}#right-panel{width:100%;border-left:none}}
+
+/* ═══════════════════════════════════════════ DASHBOARD ══════════════════════════════════════════ */
+#dashboard-page{position:fixed;inset:0;z-index:100;display:none;background:var(--bg)}
+#dashboard-page.show{display:flex}
+
+/* SIDEBAR */
+#sidebar{width:var(--sidebar);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:10;transition:transform .3s}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:24px 20px;border-bottom:1px solid var(--border)}
+.sb-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px #00e5ff22}
+.sb-brand-name{font-size:18px;font-weight:800}.sb-brand-name span{color:var(--cyan)}
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 8px 6px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--surface2)}.nav-item.active{background:linear-gradient(90deg,#00e5ff12,transparent);border-left:3px solid var(--cyan)}
+.nav-item .ni{font-size:17px;flex-shrink:0}.nav-item .nl{font-size:14px;font-weight:600;color:var(--text2)}.nav-item.active .nl{color:var(--cyan)}
+.nav-item .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px}
+.sidebar-user{padding:16px 12px;border-top:1px solid var(--border)}
+.su-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
+.su-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
+.su-info .su-name{font-size:13px;font-weight:700}.su-info .su-role{font-size:11px;color:var(--text3)}
+.su-logout{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;transition:color .2s}.su-logout:hover{color:var(--red)}
+
+/* MAIN CONTENT */
+#main-content{flex:1;height:100vh;overflow-y:auto;position:relative}
+.page-section{display:none;padding:32px 36px;min-height:100vh;animation:fadeUp .4s ease both}
+.page-section.active{display:block}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.topbar-left h1{font-size:26px;font-weight:900;letter-spacing:-.5px}
+.topbar-left p{font-size:14px;color:var(--text3);margin-top:3px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.xp-chip{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:30px}
+.xp-chip .xp-val{font-size:13px;font-weight:800;color:var(--amber)}
+.xp-chip .xp-lbl{font-size:11px;color:var(--text3)}
+.streak-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:30px;font-size:13px;font-weight:700;color:var(--orange)}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;transition:all .25s;cursor:default}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 12px 32px #00000044}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08}
+.stat-card.c1::before{background:var(--cyan)}.stat-card.c2::before{background:var(--violet)}.stat-card.c3::before{background:var(--amber)}.stat-card.c4::before{background:var(--green)}
+.stat-card .sc-icon{font-size:24px;margin-bottom:12px}
+.stat-card .sc-val{font-size:30px;font-weight:900;letter-spacing:-1px;margin-bottom:4px}
+.stat-card .sc-lbl{font-size:12px;color:var(--text3);font-weight:600}
+.stat-card .sc-change{font-size:11px;margin-top:6px;font-weight:700}
+.stat-card .sc-change.up{color:var(--green)}.stat-card .sc-change.dn{color:var(--red)}
+
+/* PROGRESS SECTIONS */
+.section-title{font-size:16px;font-weight:800;letter-spacing:-.3px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .st-sub{font-size:12px;color:var(--text3);font-weight:500;margin-left:auto}
+
+/* COURSE CARDS */
+.courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.course-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 40px #00000055}
+.course-card .cc-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px}
+.course-card .cc-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.course-card .cc-desc{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px}
+.course-card .cc-progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:10px}
+.course-card .cc-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.course-card .cc-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.cc-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
+
+/* ACTIVITY FEED */
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.activity-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;transition:all .2s}
+.activity-item:hover{border-color:var(--border2)}
+.ai-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ai-text .ai-title{font-size:13px;font-weight:700}.ai-text .ai-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.ai-xp{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber);white-space:nowrap}
+
+/* TWO COLUMN */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px}
+
+/* CARD BASE */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+
+/* LEADERBOARD */
+.lb-header{display:grid;grid-template-columns:40px 1fr 80px 80px 80px;gap:10px;padding:8px 16px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.lb-row{display:grid;grid-template-columns:40px 1fr 80px 80px 80px;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;align-items:center;margin-bottom:8px;transition:all .2s;cursor:default}
+.lb-row:hover{border-color:var(--border2);transform:translateX(4px)}
+.lb-row.me{border-color:#00e5ff44;background:#00e5ff06}
+.lb-rank{font-size:16px;font-weight:900;text-align:center}
+.lb-rank.gold{color:var(--amber)}.lb-rank.silver{color:#aab}.lb-rank.bronze{color:#c96}
+.lb-user{display:flex;align-items:center;gap:12px}
+.lb-avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0}
+.lb-uname{font-size:13px;font-weight:700}.lb-ulevel{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.lb-val{text-align:center;font-family:var(--mono);font-size:13px;font-weight:700}
+.lb-val.xpv{color:var(--amber)}.lb-val.stk{color:var(--orange)}.lb-val.bdg{color:var(--cyan)}
+
+/* QUIZ SECTION */
+.quiz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.quiz-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 12px 36px #00000055}
+.quiz-card .qc-diff{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.quiz-card .qc-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.quiz-card .qc-desc{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px}
+.quiz-card .qc-meta{display:flex;gap:14px;font-size:11px;color:var(--text3)}
+.quiz-card .qc-meta span{display:flex;align-items:center;gap:4px}
+
+/* ACTIVE QUIZ */
+#quiz-modal{position:fixed;inset:0;z-index:300;background:#00000088;backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:24px}
+#quiz-modal.show{display:flex}
+.quiz-box{background:var(--surface2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:600px;padding:36px;animation:fadeUp .4s ease both}
+.quiz-q-num{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.quiz-q-text{font-size:20px;font-weight:800;line-height:1.4;margin-bottom:28px;letter-spacing:-.3px}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.quiz-opt{padding:14px 18px;background:var(--bg);border:1px solid var(--border2);border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;text-align:left;color:var(--text);font-family:var(--font)}
+.quiz-opt:hover{border-color:var(--cyan);background:#00e5ff0a}
+.quiz-opt.correct{border-color:var(--green);background:#00e67620;color:var(--green)}
+.quiz-opt.wrong{border-color:var(--red);background:#ff174420;color:var(--red)}
+.quiz-opt.disabled{pointer-events:none}
+.quiz-progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:24px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .4s ease}
+.quiz-feedback{padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;margin-bottom:20px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:#00e67614;border:1px solid var(--green);color:var(--green)}
+.quiz-feedback.wrong{background:#ff174414;border:1px solid var(--red);color:var(--red)}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center}
+.quiz-btn{padding:12px 28px;border-radius:10px;border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.quiz-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:var(--bg)}
+.quiz-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.quiz-btn:hover{transform:translateY(-1px)}
+
+/* BADGES */
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.badge-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;transition:all .25s;cursor:default}
+.badge-item:hover{border-color:var(--border2);transform:translateY(-2px)}
+.badge-item.locked{opacity:.35;filter:grayscale(1)}
+.badge-item .bi-icon{font-size:32px;margin-bottom:10px}
+.badge-item .bi-name{font-size:12px;font-weight:800;margin-bottom:4px}
+.badge-item .bi-desc{font-size:10px;color:var(--text3);line-height:1.5}
+
+/* PROFILE */
+.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:20px;display:flex;align-items:center;gap:28px}
+.profile-avatar-wrap{position:relative;flex-shrink:0}
+.profile-avatar{width:88px;height:88px;border-radius:22px;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;box-shadow:0 0 32px #7c3aed44}
+.profile-level-ring{position:absolute;inset:-4px;border-radius:26px;border:3px solid var(--cyan);opacity:.5;animation:pulseRing 2s ease-in-out infinite}
+.profile-info h2{font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+.profile-info .pi-email{font-family:var(--mono);font-size:13px;color:var(--text3);margin-bottom:12px}
+.profile-tags{display:flex;gap:8px;flex-wrap:wrap}
+.ptag{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid}
+.profile-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-left:auto}
+.ps-item{text-align:center}.ps-item .psv{font-size:24px;font-weight:900;letter-spacing:-1px}.ps-item .psl{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* SKILL BARS */
+.skill-bar-item{margin-bottom:16px}
+.skill-bar-top{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:7px}
+.skill-bar-top span:last-child{color:var(--text3);font-family:var(--mono);font-size:12px}
+.skill-bar-bg{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.skill-bar-fill{height:100%;border-radius:4px;transition:width 1.5s ease}
+
+/* AI CHATBOT */
+#chat-container{display:flex;flex-direction:column;height:calc(100vh - 64px);max-height:860px}
+.chat-header{display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-shrink:0}
+.chat-ai-avatar{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px #00e5ff33;flex-shrink:0;position:relative}
+.chat-ai-avatar::after{content:'';position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--surface2)}
+.chat-header-info h3{font-size:16px;font-weight:800}.chat-header-info p{font-size:12px;color:var(--text3)}
+.chat-header-actions{margin-left:auto;display:flex;gap:8px}
+.chat-action-btn{padding:8px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.chat-action-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.chat-messages{flex:1;overflow-y:auto;padding:4px 0;display:flex;flex-direction:column;gap:16px}
+.chat-msg{display:flex;gap:12px;align-items:flex-start;animation:fadeUp .3s ease both}
+.chat-msg.user{flex-direction:row-reverse}
+.msg-avatar{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+.msg-avatar.ai-av{background:linear-gradient(135deg,var(--cyan),var(--blue))}
+.msg-avatar.user-av{background:linear-gradient(135deg,var(--blue),var(--violet))}
+.msg-bubble{max-width:75%;padding:14px 18px;border-radius:16px;font-size:14px;line-height:1.65}
+.chat-msg.ai .msg-bubble{background:var(--surface2);border:1px solid var(--border2);border-top-left-radius:4px}
+.chat-msg.user .msg-bubble{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;border-top-right-radius:4px}
+.msg-bubble p{margin-bottom:8px}.msg-bubble p:last-child{margin-bottom:0}
+.msg-bubble .code-block{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12px;margin:8px 0;color:var(--cyan)}
+.msg-bubble .quiz-inline{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.msg-bubble .qi-opt{padding:9px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;text-align:left;color:var(--text);font-family:var(--font);width:100%}
+.msg-bubble .qi-opt:hover{border-color:var(--cyan);background:#00e5ff08}
+.msg-time{font-size:10px;color:var(--text3);margin-top:6px;font-family:var(--mono)}
+.typing-indicator{display:flex;align-items:center;gap:5px;padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:16px;border-top-left-radius:4px;width:fit-content}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:typingBounce 1.2s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+.chat-input-area{padding-top:16px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.suggest-chip{padding:6px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.suggest-chip:hover{border-color:var(--cyan);color:var(--cyan);background:#00e5ff08}
+.chat-input-row{display:flex;gap:10px;align-items:flex-end}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:13px 16px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;resize:none;max-height:120px;line-height:1.5;transition:border-color .2s}
+.chat-input:focus{border-color:#00e5ff66}
+.chat-input::placeholder{color:var(--text3)}
+.chat-send-btn{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--blue));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:all .2s}
+.chat-send-btn:hover{transform:scale(1.05);box-shadow:0 8px 24px #00e5ff44}
+.voice-btn{width:46px;height:46px;border-radius:12px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .2s;color:var(--text2)}
+.voice-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.voice-btn.recording{background:#ff174414;border-color:var(--red);color:var(--red);animation:pulseRing 1s ease-in-out infinite}
+
+/* AI PROGRESS BAR */
+.ai-progress-section{padding:14px 18px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;margin-top:12px}
+.ap-title{font-size:12px;font-weight:800;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ap-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.ap-label{font-size:11px;color:var(--text3);width:80px;flex-shrink:0}
+.ap-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.ap-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:3px;transition:width .8s ease}
+.ap-pct{font-family:var(--mono);font-size:10px;color:var(--text2);width:32px;text-align:right}
+
+/* MINI CHARTS */
+.mini-chart{height:60px;display:flex;align-items:flex-end;gap:4px;padding:0 4px}
+.mc-bar{flex:1;border-radius:3px 3px 0 0;transition:height .8s ease;opacity:.7;cursor:pointer;position:relative}
+.mc-bar:hover{opacity:1}
+
+/* CALENDAR HEATMAP */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hm-cell{aspect-ratio:1;border-radius:3px;cursor:default;transition:transform .15s}.hm-cell:hover{transform:scale(1.3)}
+.hm-0{background:var(--border)}.hm-1{background:#0070ff33}.hm-2{background:#0070ff66}.hm-3{background:#0070ff99}.hm-4{background:var(--cyan)}
+
+/* LEVEL SYSTEM */
+.level-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden}
+.level-display{display:flex;align-items:center;gap:20px;margin-bottom:20px}
+.level-circle{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--orange));display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0;box-shadow:0 0 32px #ffab0044}
+.level-circle .lc-num{font-size:22px;font-weight:900;color:var(--bg);line-height:1}
+.level-circle .lc-lbl{font-size:10px;font-weight:800;color:var(--bg);opacity:.7;letter-spacing:1px}
+.level-info h3{font-size:20px;font-weight:900;letter-spacing:-.3px}.level-info p{font-size:13px;color:var(--text3);margin-top:4px}
+.level-xp-bar{height:10px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px}
+.level-xp-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));border-radius:5px;transition:width 1.5s ease}
+.level-xp-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);font-family:var(--mono)}
+
+/* MOBILE HAMBURGER */
+.hamburger{display:none;position:fixed;top:16px;left:16px;z-index:20;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:18px}
+@media(max-width:900px){
+  #sidebar{position:fixed;transform:translateX(-100%);z-index:50}
+  #sidebar.open{transform:translateX(0)}
+  .hamburger{display:flex}
+  .page-section{padding:20px 16px}
+  .stats-grid,.courses-grid,.quiz-grid,.badges-grid,.two-col,.three-col{grid-template-columns:1fr 1fr}
+  .profile-hero{flex-direction:column;text-align:center}
+  .profile-stats-row{grid-template-columns:repeat(2,1fr);margin-left:0}
+  .lb-header,.lb-row{grid-template-columns:40px 1fr 80px}
+  .lb-col-stk,.lb-col-bdg,.lb-val.stk,.lb-val.bdg{display:none}
+}
+@media(max-width:480px){
+  .stats-grid,.courses-grid,.quiz-grid,.badges-grid{grid-template-columns:1fr}
+}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:0% center}100%{background-position:200% center}}
+@keyframes floatCard{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+@keyframes popIn{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulseRing{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.8;transform:scale(1.03)}}
+@keyframes typingBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+@keyframes counter{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #050a1444;border-top-color:#050a14;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ════════════════════ AUTH PAGE ════════════════════ -->
+<div id="auth-page">
+  <div id="left-panel">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-name">Learn<span>Hub</span></div>
+    </div>
+    <div class="hero-tag">AI-Powered Learning Platform</div>
+    <h1 class="hero-title">Master Skills<br><span class="grad">Faster Than Ever.</span></h1>
+    <p class="hero-desc">Join 50,000+ students leveling up with AI-powered quizzes, live leaderboards, a smart dashboard, and a personal AI tutor — available 24/7.</p>
+    <div class="features-grid">
+      <div class="feat-pill"><span class="icon">📊</span><span class="lbl">Dashboard</span></div>
+      <div class="feat-pill"><span class="icon">🏆</span><span class="lbl">Leaderboard</span></div>
+      <div class="feat-pill"><span class="icon">🧠</span><span class="lbl">Quizzes</span></div>
+      <div class="feat-pill"><span class="icon">👤</span><span class="lbl">Profile</span></div>
+      <div class="feat-pill"><span class="icon">🤖</span><span class="lbl">AI Tutor</span></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="num">50K+</div><div class="lbl2">Students</div></div>
+      <div class="stat-item"><div class="num">200+</div><div class="lbl2">Courses</div></div>
+      <div class="stat-item"><div class="num">98%</div><div class="lbl2">Satisfaction</div></div>
+    </div>
+    <div class="notif-card">
+      <div class="notif-icon">🏆</div>
+      <div class="notif-text"><div class="nn">Sarah K. just hit #1 Worldwide!</div><div class="ns">Python Mastery · 2 minutes ago</div></div>
+    </div>
+  </div>
+
+  <div id="right-panel">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="form-heading"><h2>Welcome back 👋</h2><p>Sign in to continue your learning journey</p></div>
+      <div class="field"><label>Email Address</label><div class="input-wrap"><span class="iico">✉️</span><input type="email" id="l-email" placeholder="you@example.com"/></div><div class="field-error" id="l-email-err">Enter a valid email address</div></div>
+      <div class="field"><label>Password</label><div class="input-wrap"><span class="iico">🔒</span><input type="password" id="l-pass" placeholder="••••••••"/><button class="eye-btn" onclick="togglePass('l-pass',this)">👁</button></div><div class="field-error" id="l-pass-err">Password must be at least 6 characters</div></div>
+      <div class="forgot"><a href="#">Forgot password?</a></div>
+      <button class="btn-main" id="btn-login" onclick="handleLogin()">Sign In →</button>
+      <div class="divider"><div class="line"></div><span>OR</span><div class="line"></div></div>
+      <button class="btn-demo" onclick="handleDemo()">🚀 Try Demo Account — Free</button>
+      <div class="demo-hint"><div class="tip-icon">💡</div><div><div class="tip-title">Demo Credentials</div><code>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3b5f5e56547b575e5a4955534e59155a52">[email&#160;protected]</a><br>Pass:&nbsp;&nbsp;demo1234</code></div></div>
+      <p class="terms">By signing in you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="form-signup" style="display:none">
+      <div class="form-heading"><h2>Create account ✨</h2><p>Start your learning journey for free today</p></div>
+      <div class="field"><label>Full Name</label><div class="input-wrap"><span class="iico">👤</span><input type="text" id="s-name" placeholder="Alex Rivera"/></div><div class="field-error" id="s-name-err">Name is required</div></div>
+      <div class="field"><label>Email Address</label><div class="input-wrap"><span class="iico">✉️</span><input type="email" id="s-email" placeholder="you@example.com"/></div><div class="field-error" id="s-email-err">Enter a valid email address</div></div>
+      <div class="field"><label>Password</label><div class="input-wrap"><span class="iico">🔒</span><input type="password" id="s-pass" placeholder="Min 6 characters"/><button class="eye-btn" onclick="togglePass('s-pass',this)">👁</button></div><div class="field-error" id="s-pass-err">Password must be at least 6 characters</div></div>
+      <div class="field"><label>Confirm Password</label><div class="input-wrap"><span class="iico">🔑</span><input type="password" id="s-confirm" placeholder="Repeat password"/><button class="eye-btn" onclick="togglePass('s-confirm',this)">👁</button></div><div class="field-error" id="s-confirm-err">Passwords do not match</div></div>
+      <button class="btn-main" id="btn-signup" onclick="handleSignup()" style="margin-top:6px">Create Account →</button>
+      <div class="divider"><div class="line"></div><span>OR</span><div class="line"></div></div>
+      <button class="btn-demo" onclick="handleDemo()">🚀 Try Demo Account — Free</button>
+      <p class="terms">By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ DASHBOARD PAGE ════════════════════ -->
+<div id="dashboard-page">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-icon">⚡</div>
+      <div class="sb-brand-name">Learn<span>Hub</span></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="ni">📊</span><span class="nl">Dashboard</span></div>
+      <div class="nav-item" onclick="showPage('leaderboard',this)"><span class="ni">🏆</span><span class="nl">Leaderboard</span></div>
+      <div class="nav-item" onclick="showPage('quizzes',this)"><span class="ni">🧠</span><span class="nl">Quizzes</span><span class="badge">3</span></div>
+      <div class="nav-section-label">Learning</div>
+      <div class="nav-item" onclick="showPage('courses',this)"><span class="ni">📚</span><span class="nl">Courses</span></div>
+      <div class="nav-item" onclick="showPage('progress',this)"><span class="ni">📈</span><span class="nl">My Progress</span></div>
+      <div class="nav-item" onclick="showPage('badges',this)"><span class="ni">🎖️</span><span class="nl">Badges</span></div>
+      <div class="nav-section-label">Tools</div>
+      <div class="nav-item" onclick="showPage('chatbot',this)"><span class="ni">🤖</span><span class="nl">AI Tutor</span></div>
+      <div class="nav-item" onclick="showPage('profile',this)"><span class="ni">👤</span><span class="nl">Profile</span></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="su-card">
+        <div class="su-avatar" id="sb-avatar">A</div>
+        <div class="su-info"><div class="su-name" id="sb-name">Alex Rivera</div><div class="su-role">Level 12 · Pro</div></div>
+        <button class="su-logout" onclick="doLogout()" title="Logout">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page-section active" id="page-dashboard">
+      <div class="topbar">
+        <div class="topbar-left"><h1>Dashboard 📊</h1><p>Welcome back, <span id="dash-name">Alex</span>! Keep up the great work.</p></div>
+        <div class="topbar-right">
+          <div class="xp-chip"><span>⚡</span><span class="xp-val">4,820 XP</span><span class="xp-lbl">today +120</span></div>
+          <div class="streak-chip">🔥 14 day streak</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card c1"><div class="sc-icon">⚡</div><div class="sc-val">4,820</div><div class="sc-lbl">Total XP</div><div class="sc-change up">↑ +120 today</div></div>
+        <div class="stat-card c2"><div class="sc-icon">🧠</div><div class="sc-val">47</div><div class="sc-lbl">Quizzes Done</div><div class="sc-change up">↑ +3 this week</div></div>
+        <div class="stat-card c3"><div class="sc-icon">🔥</div><div class="sc-val">14</div><div class="sc-lbl">Day Streak</div><div class="sc-change up">↑ Personal best!</div></div>
+        <div class="stat-card c4"><div class="sc-icon">🎖️</div><div class="sc-val">18</div><div class="sc-lbl">Badges Earned</div><div class="sc-change up">↑ 2 new this week</div></div>
+      </div>
+
+      <div class="two-col" style="margin-bottom:28px">
+        <div class="card">
+          <div class="section-title">📅 Learning Activity <span class="st-sub">Last 5 weeks</span></div>
+          <div class="mini-chart" id="activity-chart"></div>
+        </div>
+        <div>
+          <div class="level-card">
+            <div class="level-display">
+              <div class="level-circle"><div class="lc-num">12</div><div class="lc-lbl">LEVEL</div></div>
+              <div class="level-info"><h3>Code Warrior</h3><p>780 XP to next level</p></div>
+            </div>
+            <div class="level-xp-bar"><div class="level-xp-fill" style="width:69%"></div></div>
+            <div class="level-xp-meta"><span>4,820 XP</span><span>Level 13 at 5,600 XP</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">🚀 Continue Learning <span class="st-sub">Your courses</span></div>
+      <div class="courses-grid" style="margin-bottom:28px">
+        <div class="course-card" onclick="showPage('courses',null)">
+          <div class="cc-tag" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff33">🐍 Python</div>
+          <div class="cc-badge" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff22">In Progress</div>
+          <div class="cc-title">Python for Data Science</div>
+          <div class="cc-desc">Master pandas, numpy, and build real ML pipelines from scratch.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:72%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div></div>
+          <div class="cc-meta"><span>72% complete</span><span>18/25 lessons</span></div>
+        </div>
+        <div class="course-card" onclick="showPage('courses',null)">
+          <div class="cc-tag" style="background:#7c3aed14;color:var(--violet);border:1px solid #7c3aed33">⚛️ React</div>
+          <div class="cc-badge" style="background:#ffab0014;color:var(--amber);border:1px solid #ffab0022">New Lessons</div>
+          <div class="cc-title">React & Next.js Mastery</div>
+          <div class="cc-desc">Build production-ready web apps with modern React patterns.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:45%;background:linear-gradient(90deg,var(--violet),#a855f7)"></div></div>
+          <div class="cc-meta"><span>45% complete</span><span>9/20 lessons</span></div>
+        </div>
+        <div class="course-card" onclick="showPage('courses',null)">
+          <div class="cc-tag" style="background:#00e67614;color:var(--green);border:1px solid #00e67633">🤖 ML</div>
+          <div class="cc-badge" style="background:#ff174414;color:var(--red);border:1px solid #ff174422">Not Started</div>
+          <div class="cc-title">Machine Learning A-Z</div>
+          <div class="cc-desc">From linear regression to neural networks — complete ML roadmap.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:0%;background:linear-gradient(90deg,var(--green),#22d3ee)"></div></div>
+          <div class="cc-meta"><span>0% complete</span><span>0/30 lessons</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">⚡ Recent Activity</div>
+      <div class="activity-list">
+        <div class="activity-item"><div class="ai-icon" style="background:#00e5ff14">🧠</div><div class="ai-text"><div class="ai-title">Completed Python Quiz — Arrays & Lists</div><div class="ai-sub">Score: 9/10 · 2 hours ago</div></div><div class="ai-xp">+45 XP</div></div>
+        <div class="activity-item"><div class="ai-icon" style="background:#7c3aed14">📚</div><div class="ai-text"><div class="ai-title">Finished Lesson: React Hooks Deep Dive</div><div class="ai-sub">React & Next.js Mastery · 5 hours ago</div></div><div class="ai-xp">+30 XP</div></div>
+        <div class="activity-item"><div class="ai-icon" style="background:#ffab0014">🏆</div><div class="ai-text"><div class="ai-title">Reached #4 on Weekly Leaderboard</div><div class="ai-sub">Top 5% of all students · Yesterday</div></div><div class="ai-xp">+100 XP</div></div>
+        <div class="activity-item"><div class="ai-icon" style="background:#00e67614">🎖️</div><div class="ai-text"><div class="ai-title">Earned Badge: "Streak Master"</div><div class="ai-sub">10-day learning streak achieved · Yesterday</div></div><div class="ai-xp">+50 XP</div></div>
+      </div>
+    </div>
+
+    <!-- ── LEADERBOARD ── -->
+    <div class="page-section" id="page-leaderboard">
+      <div class="topbar"><div class="topbar-left"><h1>Leaderboard 🏆</h1><p>Real-time global rankings — updated every 60 seconds</p></div><div class="topbar-right"><div class="streak-chip">🔴 Live</div></div></div>
+
+      <div class="three-col" style="margin-bottom:28px">
+        <div class="card" style="text-align:center"><div style="font-size:32px;margin-bottom:8px">🥇</div><div style="font-size:22px;font-weight:900;color:var(--amber)">Sarah K.</div><div style="font-size:13px;color:var(--text3);margin-top:4px">8,420 XP · 32 streak</div></div>
+        <div class="card" style="text-align:center;border-color:#00e5ff33"><div style="font-size:32px;margin-bottom:8px">🔵</div><div style="font-size:22px;font-weight:900;color:var(--cyan)" id="lb-you-card">You — #4</div><div style="font-size:13px;color:var(--text3);margin-top:4px">4,820 XP · 14 streak</div></div>
+        <div class="card" style="text-align:center"><div style="font-size:32px;margin-bottom:8px">🎯</div><div style="font-size:22px;font-weight:900;color:var(--text)">Next XP Gap</div><div style="font-size:13px;color:var(--text3);margin-top:4px">460 XP to reach #3</div></div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="section-title">🌍 Global Rankings</div>
+          <div class="lb-header"><span></span><span>Student</span><span style="text-align:center" class="lb-col-xp">XP</span><span style="text-align:center" class="lb-col-stk">Streak</span><span style="text-align:center" class="lb-col-bdg">Badges</span></div>
+          <div id="lb-list"></div>
+        </div>
+        <div>
+          <div class="section-title">📅 Weekly Challenge</div>
+          <div class="card" style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--amber),var(--orange));display:flex;align-items:center;justify-content:center;font-size:20px">⚡</div>
+              <div><div style="font-size:15px;font-weight:800">Speed Coder Challenge</div><div style="font-size:12px;color:var(--text3)">Ends in 2d 14h 32m</div></div>
+            </div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">Complete 5 timed coding quizzes this week. Top 3 scorers win exclusive badges and 500 bonus XP!</div>
+            <div style="margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:6px"><span>Your progress</span><span style="color:var(--cyan);font-family:var(--mono)">3/5 quizzes</span></div>
+              <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:60%;background:linear-gradient(90deg,var(--amber),var(--orange));border-radius:3px;transition:width 1s ease"></div></div>
+            </div>
+            <button class="btn-main" onclick="showPage('quizzes',null)" style="margin-bottom:0">Take Next Quiz →</button>
+          </div>
+          <div class="section-title">🔥 Top Streaks</div>
+          <div class="activity-list" id="streak-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── QUIZZES ── -->
+    <div class="page-section" id="page-quizzes">
+      <div class="topbar"><div class="topbar-left"><h1>Quizzes 🧠</h1><p>Test your knowledge — adaptive difficulty, powered by AI</p></div><div class="topbar-right"><div class="xp-chip"><span>🧠</span><span class="xp-val">47 done</span><span class="xp-lbl">this month</span></div></div></div>
+
+      <div class="stats-grid" style="margin-bottom:28px">
+        <div class="stat-card c1"><div class="sc-icon">✅</div><div class="sc-val">47</div><div class="sc-lbl">Completed</div><div class="sc-change up">↑ All time</div></div>
+        <div class="stat-card c2"><div class="sc-icon">🎯</div><div class="sc-val">84%</div><div class="sc-lbl">Avg Score</div><div class="sc-change up">↑ Top 15%</div></div>
+        <div class="stat-card c3"><div class="sc-icon">⚡</div><div class="sc-val">1,880</div><div class="sc-lbl">XP from Quizzes</div><div class="sc-change up">↑ This month</div></div>
+        <div class="stat-card c4"><div class="sc-icon">🔥</div><div class="sc-val">9</div><div class="sc-lbl">Perfect Scores</div><div class="sc-change up">↑ 2 this week</div></div>
+      </div>
+
+      <div class="section-title">🎯 Available Quizzes <span class="st-sub">AI-adjusted to your level</span></div>
+      <div class="quiz-grid">
+        <div class="quiz-card" onclick="startQuiz('python')">
+          <div class="qc-diff" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff33">🟢 Intermediate</div>
+          <div class="qc-title">Python: Data Structures</div>
+          <div class="qc-desc">Lists, dicts, sets and tuples — with real-world usage patterns.</div>
+          <div class="qc-meta"><span>⏱ 10 min</span><span>❓ 10 questions</span><span>⚡ +80 XP</span></div>
+        </div>
+        <div class="quiz-card" onclick="startQuiz('js')">
+          <div class="qc-diff" style="background:#ffab0014;color:var(--amber);border:1px solid #ffab0033">🟡 Advanced</div>
+          <div class="qc-title">JavaScript Async & Promises</div>
+          <div class="qc-desc">Master async/await, callbacks, and the event loop in depth.</div>
+          <div class="qc-meta"><span>⏱ 15 min</span><span>❓ 12 questions</span><span>⚡ +120 XP</span></div>
+        </div>
+        <div class="quiz-card" onclick="startQuiz('ml')">
+          <div class="qc-diff" style="background:#ff174414;color:var(--red);border:1px solid #ff174433">🔴 Expert</div>
+          <div class="qc-title">Machine Learning Basics</div>
+          <div class="qc-desc">Gradient descent, bias-variance, overfitting — the fundamentals.</div>
+          <div class="qc-meta"><span>⏱ 20 min</span><span>❓ 15 questions</span><span>⚡ +200 XP</span></div>
+        </div>
+        <div class="quiz-card" onclick="startQuiz('react')">
+          <div class="qc-diff" style="background:#7c3aed14;color:var(--violet);border:1px solid #7c3aed33">🟣 Intermediate</div>
+          <div class="qc-title">React Hooks & State</div>
+          <div class="qc-desc">useState, useEffect, useContext and custom hook patterns.</div>
+          <div class="qc-meta"><span>⏱ 12 min</span><span>❓ 10 questions</span><span>⚡ +90 XP</span></div>
+        </div>
+        <div class="quiz-card" onclick="startQuiz('algo')">
+          <div class="qc-diff" style="background:#ff174414;color:var(--red);border:1px solid #ff174433">🔴 Expert</div>
+          <div class="qc-title">Algorithms & Big-O</div>
+          <div class="qc-desc">Sorting, searching, time complexity and space analysis.</div>
+          <div class="qc-meta"><span>⏱ 25 min</span><span>❓ 15 questions</span><span>⚡ +220 XP</span></div>
+        </div>
+        <div class="quiz-card" onclick="startQuiz('sql')">
+          <div class="qc-diff" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff33">🟢 Beginner</div>
+          <div class="qc-title">SQL Fundamentals</div>
+          <div class="qc-desc">SELECT, JOIN, GROUP BY and query optimization essentials.</div>
+          <div class="qc-meta"><span>⏱ 8 min</span><span>❓ 8 questions</span><span>⚡ +60 XP</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COURSES ── -->
+    <div class="page-section" id="page-courses">
+      <div class="topbar"><div class="topbar-left"><h1>Courses 📚</h1><p>Click any course to open it on Coursera</p></div><div class="topbar-right"><div class="xp-chip"><span>🎓</span><span class="xp-val">Coursera</span><span class="xp-lbl">Powered</span></div></div></div>
+
+      <div class="section-title">🔥 Your Enrolled Courses <span class="st-sub">Continue where you left off</span></div>
+      <div class="courses-grid" style="margin-bottom:32px">
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/python-for-applied-data-science-ai')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff33">🐍 Python</div>
+          <div class="cc-badge" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff22">In Progress</div>
+          <div class="cc-title">Python for Data Science & AI</div>
+          <div class="cc-desc">Master pandas, NumPy, matplotlib and build real AI/ML pipelines. By IBM on Coursera.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:72%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div></div>
+          <div class="cc-meta"><span>72% complete · 18/25</span><span style="color:var(--cyan);font-weight:700">▶ Open on Coursera</span></div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/front-end-react')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#7c3aed14;color:var(--violet);border:1px solid #7c3aed33">⚛️ React</div>
+          <div class="cc-badge" style="background:#ffab0014;color:var(--amber);border:1px solid #ffab0022">New Lessons</div>
+          <div class="cc-title">Front-End Development with React</div>
+          <div class="cc-desc">Build dynamic UIs with React, Redux, and modern JavaScript. By Hong Kong Univ.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:45%;background:linear-gradient(90deg,var(--violet),#a855f7)"></div></div>
+          <div class="cc-meta"><span>45% complete · 9/20</span><span style="color:var(--violet);font-weight:700">▶ Open on Coursera</span></div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/machine-learning')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#00e67614;color:var(--green);border:1px solid #00e67633">🤖 ML</div>
+          <div class="cc-badge" style="background:#ff174414;color:var(--red);border:1px solid #ff174422">Not Started</div>
+          <div class="cc-title">Machine Learning Specialization</div>
+          <div class="cc-desc">Andrew Ng's legendary ML course — from regression to neural networks. By Stanford.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:0%;background:var(--green)"></div></div>
+          <div class="cc-meta"><span>0% · 0/30 lessons</span><span style="color:var(--green);font-weight:700">▶ Open on Coursera</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">🌐 Explore by Language <span class="st-sub">All link directly to Coursera</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px">
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/python')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🐍</div>
+          <div class="cc-title" style="font-size:14px">Python</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">University of Michigan · Beginner to Pro</div>
+          <div style="font-size:11px;color:var(--cyan);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/html-css-javascript-for-web-developers')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🌐</div>
+          <div class="cc-title" style="font-size:14px">HTML / CSS / JS</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">Johns Hopkins · Web Dev fundamentals</div>
+          <div style="font-size:11px;color:var(--amber);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/javascript-basics')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">⚡</div>
+          <div class="cc-title" style="font-size:14px">JavaScript</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">University of Michigan · JS from scratch</div>
+          <div style="font-size:11px;color:var(--amber);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/specializations/java-programming')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">☕</div>
+          <div class="cc-title" style="font-size:14px">Java</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">Duke University · OOP & Data Structures</div>
+          <div style="font-size:11px;color:var(--orange);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/c-for-everyone')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🔵</div>
+          <div class="cc-title" style="font-size:14px">C / C++</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">UC Santa Cruz · Systems programming</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/scala-functional-programming')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🔴</div>
+          <div class="cc-title" style="font-size:14px">Scala</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">EPFL · Functional Programming principles</div>
+          <div style="font-size:11px;color:var(--red);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/golang')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🐹</div>
+          <div class="cc-title" style="font-size:14px">Go (Golang)</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">UC Irvine · Concurrency & backend</div>
+          <div style="font-size:11px;color:var(--cyan);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/swift-programming')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🍎</div>
+          <div class="cc-title" style="font-size:14px">Swift / iOS</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">Univ. of Toronto · iOS app development</div>
+          <div style="font-size:11px;color:var(--orange);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/kotlin-for-java-developers')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🟣</div>
+          <div class="cc-title" style="font-size:14px">Kotlin</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">JetBrains · Modern Android development</div>
+          <div style="font-size:11px;color:var(--violet);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/r-programming')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">📊</div>
+          <div class="cc-title" style="font-size:14px">R Programming</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">Johns Hopkins · Data Analysis & Stats</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/sql-for-data-science')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🗄️</div>
+          <div class="cc-title" style="font-size:14px">SQL</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">UC Davis · SQL for Data Science</div>
+          <div style="font-size:11px;color:var(--green);font-weight:700">▶ Coursera →</div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/learn/typescript-for-beginners')" style="cursor:pointer;padding:18px">
+          <div style="font-size:36px;margin-bottom:10px">🔷</div>
+          <div class="cc-title" style="font-size:14px">TypeScript</div>
+          <div class="cc-desc" style="font-size:11px;margin-bottom:10px">Microsoft · Typed JavaScript at scale</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:700">▶ Coursera →</div>
+        </div>
+      </div>
+
+      <div class="section-title">🏆 Specializations & Certifications</div>
+      <div class="courses-grid">
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/professional-certificates/google-data-analytics')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#ffab0014;color:var(--amber);border:1px solid #ffab0033">🎓 Certificate</div>
+          <div class="cc-badge" style="background:#00e67614;color:var(--green);border:1px solid #00e67622">Most Popular</div>
+          <div class="cc-title">Google Data Analytics</div>
+          <div class="cc-desc">Professional certificate by Google. Master data tools, SQL, R, and visualization.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:0%"></div></div>
+          <div class="cc-meta"><span>6 months · 8 courses</span><span style="color:var(--amber);font-weight:700">▶ Coursera →</span></div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/professional-certificates/meta-back-end-developer')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#7c3aed14;color:var(--violet);border:1px solid #7c3aed33">🎓 Certificate</div>
+          <div class="cc-title">Meta Back-End Developer</div>
+          <div class="cc-desc">Professional certificate by Meta. Python, Django, APIs, MySQL, and DevOps.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:0%"></div></div>
+          <div class="cc-meta"><span>8 months · 9 courses</span><span style="color:var(--violet);font-weight:700">▶ Coursera →</span></div>
+        </div>
+        <div class="course-card" onclick="openCourse('https://www.coursera.org/specializations/deep-learning')" style="cursor:pointer">
+          <div class="cc-tag" style="background:#00e5ff14;color:var(--cyan);border:1px solid #00e5ff33">🎓 Specialization</div>
+          <div class="cc-title">Deep Learning Specialization</div>
+          <div class="cc-desc">Andrew Ng's Deep Learning series — CNNs, RNNs, transformers, deployment.</div>
+          <div class="cc-progress-bar"><div class="cc-fill" style="width:0%"></div></div>
+          <div class="cc-meta"><span>5 months · 5 courses</span><span style="color:var(--cyan);font-weight:700">▶ Coursera →</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROGRESS ── -->
+    <div class="page-section" id="page-progress">
+      <div class="topbar"><div class="topbar-left"><h1>My Progress 📈</h1><p>Detailed analytics on your learning journey</p></div></div>
+      <div class="two-col" style="margin-bottom:24px">
+        <div class="card">
+          <div class="section-title">🎯 Skill Levels</div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span>Python</span><span>Level 8 · Advanced</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:80%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span>JavaScript</span><span>Level 6 · Intermediate</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:62%;background:linear-gradient(90deg,var(--amber),var(--orange))"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span>React</span><span>Level 5 · Intermediate</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:50%;background:linear-gradient(90deg,var(--violet),#a855f7)"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span>Machine Learning</span><span>Level 2 · Beginner</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:20%;background:linear-gradient(90deg,var(--green),#22d3ee)"></div></div></div>
+          <div class="skill-bar-item"><div class="skill-bar-top"><span>SQL</span><span>Level 7 · Advanced</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" style="width:70%;background:linear-gradient(90deg,var(--pink),var(--violet))"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">📅 Activity Heatmap <span class="st-sub">Past 5 weeks</span></div>
+          <div class="heatmap" id="heatmap"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;color:var(--text3)">
+            <span>Less</span>
+            <div style="width:12px;height:12px;border-radius:2px" class="hm-0"></div>
+            <div style="width:12px;height:12px;border-radius:2px" class="hm-1"></div>
+            <div style="width:12px;height:12px;border-radius:2px" class="hm-2"></div>
+            <div style="width:12px;height:12px;border-radius:2px" class="hm-3"></div>
+            <div style="width:12px;height:12px;border-radius:2px" class="hm-4"></div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="level-card">
+          <div class="section-title">⚡ Level Progress</div>
+          <div class="level-display"><div class="level-circle"><div class="lc-num">12</div><div class="lc-lbl">LEVEL</div></div><div class="level-info"><h3>Code Warrior</h3><p>780 XP to reach Level 13 "Data Sage"</p></div></div>
+          <div class="level-xp-bar"><div class="level-xp-fill" style="width:69%"></div></div>
+          <div class="level-xp-meta"><span>4,820 / 5,600 XP</span><span>69% to next level</span></div>
+          <div style="margin-top:18px;display:flex;gap:10px">
+            <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--amber)">12</div><div style="font-size:11px;color:var(--text3)">Current Level</div></div>
+            <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--green)">47</div><div style="font-size:11px;color:var(--text3)">Quizzes Passed</div></div>
+            <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--cyan)">18</div><div style="font-size:11px;color:var(--text3)">Badges</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">📊 Quiz Performance</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px"><span>Python</span><span style="color:var(--green);font-family:var(--mono)">92%</span></div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:92%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px"><span>JavaScript</span><span style="color:var(--amber);font-family:var(--mono)">78%</span></div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:78%;background:linear-gradient(90deg,var(--amber),var(--orange));border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px"><span>React</span><span style="color:var(--violet);font-family:var(--mono)">81%</span></div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:81%;background:linear-gradient(90deg,var(--violet),#a855f7);border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px"><span>SQL</span><span style="color:var(--cyan);font-family:var(--mono)">88%</span></div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:88%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px"><span>Algorithms</span><span style="color:var(--red);font-family:var(--mono)">67%</span></div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:67%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:3px"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BADGES ── -->
+    <div class="page-section" id="page-badges">
+      <div class="topbar"><div class="topbar-left"><h1>Badges 🎖️</h1><p>Your achievements — earned through dedication and skill</p></div><div class="topbar-right"><div class="xp-chip"><span>🎖️</span><span class="xp-val">18 earned</span><span class="xp-lbl">of 32 total</span></div></div></div>
+      <div class="section-title">✅ Earned Badges</div>
+      <div class="badges-grid" style="margin-bottom:28px" id="earned-badges"></div>
+      <div class="section-title">🔒 Locked Badges</div>
+      <div class="badges-grid" id="locked-badges"></div>
+    </div>
+
+    <!-- ── AI CHATBOT ── -->
+    <div class="page-section" id="page-chatbot">
+      <div id="chat-container">
+        <div class="chat-header">
+          <div class="chat-ai-avatar">🤖</div>
+          <div class="chat-header-info"><h3>Nova — AI Tutor <span style="font-size:11px;background:#00e5ff18;color:var(--cyan);padding:3px 10px;border-radius:20px;font-weight:700;margin-left:8px">Powered by Claude AI</span></h3><p>Real AI · Explains concepts · Creates quizzes · Tracks your progress · Voice ready</p></div>
+          <div class="chat-header-actions">
+            <button class="chat-action-btn" onclick="clearChat()">🗑 Clear</button>
+            <button class="chat-action-btn" id="voice-toggle-btn" onclick="toggleVoice()">🎙 Voice Mode</button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <div class="chat-suggestions" id="chat-suggestions"></div>
+          <div class="chat-input-row">
+            <button class="voice-btn" id="voice-btn" onclick="toggleRecording()" title="Voice input">🎙</button>
+            <textarea class="chat-input" id="chat-input" placeholder="Ask Nova anything — explain Python, quiz me on React, help with algorithms..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="chat-send-btn" id="chat-send-btn" onclick="sendChat()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROFILE ── -->
+    <div class="page-section" id="page-profile">
+      <div class="topbar"><div class="topbar-left"><h1>Profile 👤</h1><p>Your learning identity and achievements</p></div></div>
+      <div class="profile-hero">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profile-avatar-big">A</div>
+          <div class="profile-level-ring"></div>
+        </div>
+        <div class="profile-info" style="flex:1">
+          <h2 id="profile-name-big">Alex Rivera</h2>
+          <div class="pi-email" id="profile-email-big"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2044454d4f604c4541524e4855420e4149">[email&#160;protected]</a></div>
+          <div class="profile-tags">
+            <div class="ptag" style="background:#ffab0014;color:var(--amber);border-color:#ffab0033">⚡ Level 12</div>
+            <div class="ptag" style="background:#00e5ff14;color:var(--cyan);border-color:#00e5ff33">🏆 Code Warrior</div>
+            <div class="ptag" style="background:#7c3aed14;color:var(--violet);border-color:#7c3aed33">🔥 14-Day Streak</div>
+            <div class="ptag" style="background:#00e67614;color:var(--green);border-color:#00e67633">⭐ Pro Member</div>
+          </div>
+        </div>
+        <div class="profile-stats-row">
+          <div class="ps-item"><div class="psv" style="color:var(--amber)">4,820</div><div class="psl">Total XP</div></div>
+          <div class="ps-item"><div class="psv" style="color:var(--cyan)">47</div><div class="psl">Quizzes</div></div>
+          <div class="ps-item"><div class="psv" style="color:var(--violet)">18</div><div class="psl">Badges</div></div>
+          <div class="ps-item"><div class="psv" style="color:var(--green)">14</div><div class="psl">Day Streak</div></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="section-title">⚙️ Edit Profile</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><div style="font-size:11px;font-family:var(--mono);letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:7px">Display Name</div><input type="text" id="edit-name" value="Alex Rivera" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;padding:12px 16px;border-radius:10px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#00e5ff66'" onblur="this.style.borderColor='var(--border2)'"/></div>
+            <div><div style="font-size:11px;font-family:var(--mono);letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:7px">Email</div><input type="email" id="edit-email" value="demo@learnhub.ai" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;padding:12px 16px;border-radius:10px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#00e5ff66'" onblur="this.style.borderColor='var(--border2)'"/></div>
+            <div><div style="font-size:11px;font-family:var(--mono);letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:7px">Learning Goal</div><select style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;padding:12px 16px;border-radius:10px;outline:none"><option>Full Stack Developer</option><option>Data Scientist</option><option>ML Engineer</option><option>DevOps Engineer</option></select></div>
+            <button class="btn-main" onclick="saveProfile()" style="margin-bottom:0">Save Changes</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">🏆 Recent Badges</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="profile-badges"></div>
+          <div style="margin-top:20px">
+            <div class="section-title">📊 Learning Goals</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:12px"><span style="font-size:16px">🎯</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Complete Python Course</div><div style="font-size:11px;color:var(--text3)">72% progress</div></div><div style="color:var(--cyan);font-size:12px;font-weight:700">In Progress</div></div>
+              <div style="padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:12px"><span style="font-size:16px">🏆</span><div style="flex:1"><div style="font-size:13px;font-weight:700">Reach Top 3 Leaderboard</div><div style="font-size:11px;color:var(--text3)">Currently #4 — 460 XP gap</div></div><div style="color:var(--amber);font-size:12px;font-weight:700">Close!</div></div>
+              <div style="padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:12px"><span style="font-size:16px">🔥</span><div style="flex:1"><div style="font-size:13px;font-weight:700">30-Day Streak</div><div style="font-size:11px;color:var(--text3)">14 days — 16 to go</div></div><div style="color:var(--orange);font-size:12px;font-weight:700">14 / 30</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /dashboard-page -->
+
+<!-- QUIZ MODAL -->
+<div id="quiz-modal">
+  <div class="quiz-box">
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="qpf" style="width:10%"></div></div>
+    <div class="quiz-q-num" id="q-num">Question 1 of 5</div>
+    <div class="quiz-q-text" id="q-text">Loading question...</div>
+    <div class="quiz-options" id="q-opts"></div>
+    <div class="quiz-feedback" id="q-feedback"></div>
+    <div class="quiz-nav">
+      <button class="quiz-btn secondary" onclick="closeQuiz()">✕ Exit Quiz</button>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span id="q-score-display" style="font-family:var(--mono);font-size:13px;color:var(--text3)">Score: 0/0</span>
+        <button class="quiz-btn primary" id="q-next-btn" onclick="nextQuestion()" style="display:none">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ════════════ CANVAS BG ════════════ */
+const cvs=document.getElementById('bg-canvas'),ctx=cvs.getContext('2d');
+let W,H,parts=[];
+function rsz(){W=cvs.width=innerWidth;H=cvs.height=innerHeight}
+function mkParts(){parts=[];const n=Math.floor(W*H/18000);for(let i=0;i<n;i++)parts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:Math.random()*.4+.1})}
+function drawBg(){ctx.clearRect(0,0,W,H);[[.15,.2,.45,'0,113,255',.08],[.85,.8,.4,'0,229,255',.06],[.5,.5,.35,'101,31,255',.04]].forEach(([x,y,r,c,o])=>{const g=ctx.createRadialGradient(W*x,H*y,0,W*x,H*y,W*r);g.addColorStop(0,`rgba(${c},${o})`);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)});parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(100,180,255,${p.a})`;ctx.fill()});requestAnimationFrame(drawBg)}
+rsz();mkParts();drawBg();addEventListener('resize',()=>{rsz();mkParts()});
+
+/* ════════════ AUTH ════════════ */
+let currentUser={name:'Alex Rivera',email:'demo@learnhub.ai',avatar:'A'};
+
+function switchTab(t){
+  const il=t==='login';
+  document.getElementById('form-login').style.display=il?'block':'none';
+  document.getElementById('form-signup').style.display=il?'none':'block';
+  document.getElementById('tab-login').classList.toggle('active',il);
+  document.getElementById('tab-signup').classList.toggle('active',!il);
+  clearErrors();
+}
+function togglePass(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈'}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');const inp=document.getElementById(id.replace('-err',''));if(inp)inp.classList.add('err')}
+function clearErrors(){document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'));document.querySelectorAll('input').forEach(e=>e.classList.remove('err'))}
+function setLoad(id,on,lbl){const b=document.getElementById(id);b.disabled=on;b.innerHTML=on?`<span class="spinner"></span>${lbl}`:lbl}
+
+function handleLogin(){
+  clearErrors();
+  const em=document.getElementById('l-email').value.trim(),pw=document.getElementById('l-pass').value;
+  let ok=true;
+  if(!em.includes('@')){showErr('l-email-err','Enter a valid email address');ok=false}
+  if(pw.length<6){showErr('l-pass-err','Min 6 characters');ok=false}
+  if(!ok)return;
+  setLoad('btn-login',true,'Signing in...');
+  const nm=em.split('@')[0].replace(/[^a-z]/gi,'').replace(/^\w/,c=>c.toUpperCase())||'Student';
+  setTimeout(()=>{setLoad('btn-login',false,'Sign In →');launchDashboard({name:nm,email:em,avatar:nm[0].toUpperCase()})},1400);
+}
+function handleSignup(){
+  clearErrors();
+  const nm=document.getElementById('s-name').value.trim(),em=document.getElementById('s-email').value.trim(),pw=document.getElementById('s-pass').value,co=document.getElementById('s-confirm').value;
+  let ok=true;
+  if(!nm){showErr('s-name-err','Name is required');ok=false}
+  if(!em.includes('@')){showErr('s-email-err','Valid email required');ok=false}
+  if(pw.length<6){showErr('s-pass-err','Min 6 characters');ok=false}
+  if(pw!==co){showErr('s-confirm-err','Passwords do not match');ok=false}
+  if(!ok)return;
+  setLoad('btn-signup',true,'Creating account...');
+  setTimeout(()=>{setLoad('btn-signup',false,'Create Account →');launchDashboard({name:nm,email:em,avatar:nm[0].toUpperCase()})},1400);
+}
+function handleDemo(){
+  document.querySelectorAll('.btn-demo').forEach(b=>{b.disabled=true;b.textContent='⏳ Loading...'});
+  setTimeout(()=>launchDashboard({name:'Alex Rivera',email:'demo@learnhub.ai',avatar:'A'}),1200);
+}
+function launchDashboard(user){
+  currentUser=user;
+  document.getElementById('sb-avatar').textContent=user.avatar;
+  document.getElementById('sb-name').textContent=user.name;
+  document.getElementById('dash-name').textContent=user.name.split(' ')[0];
+  document.getElementById('profile-avatar-big').textContent=user.avatar;
+  document.getElementById('profile-name-big').textContent=user.name;
+  document.getElementById('profile-email-big').textContent=user.email;
+  document.getElementById('edit-name').value=user.name;
+  document.getElementById('edit-email').value=user.email;
+  document.getElementById('auth-page').classList.add('hidden');
+  document.getElementById('dashboard-page').classList.add('show');
+  initDashboard();
+}
+function doLogout(){
+  document.getElementById('dashboard-page').classList.remove('show');
+  document.getElementById('auth-page').classList.remove('hidden');
+  document.querySelectorAll('.btn-demo').forEach(b=>{b.disabled=false;b.innerHTML='🚀 Try Demo Account — Free'});
+  document.getElementById('btn-login').disabled=false;document.getElementById('btn-login').textContent='Sign In →';
+  document.querySelectorAll('input').forEach(i=>i.value='');
+}
+
+/* ════════════ DASHBOARD NAV ════════════ */
+function showPage(id,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  else{const found=[...document.querySelectorAll('.nav-item')].find(n=>n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));if(found)found.classList.add('active')}
+  if(window.innerWidth<900)document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+
+/* ════════════ INIT DASHBOARD ════════════ */
+function initDashboard(){
+  buildActivityChart();buildLeaderboard();buildBadges();buildHeatmap();
+  initChat();
+  setTimeout(()=>{document.querySelectorAll('.skill-bar-fill').forEach(el=>{const w=el.style.width;el.style.width='0';setTimeout(()=>el.style.width=w,100)})},300);
+}
+
+/* Activity chart */
+function buildActivityChart(){
+  const c=document.getElementById('activity-chart');c.innerHTML='';
+  const vals=[30,55,80,45,90,70,40,85,60,95,50,75,65,88,42];
+  const colors=['var(--cyan)','var(--blue)','var(--violet)','var(--amber)','var(--green)'];
+  vals.forEach((v,i)=>{const b=document.createElement('div');b.className='mc-bar';b.style.cssText=`height:${v}%;background:${colors[i%colors.length]};transition:height .8s ${i*.04}s ease`;c.appendChild(b)});
+}
+
+/* Leaderboard */
+const lbData=[
+  {rank:1,name:'Sarah K.',avatar:'S',level:18,xp:8420,streak:32,badges:28,colors:'#ffab00,#ff6d00'},
+  {rank:2,name:'Marcus T.',avatar:'M',level:16,xp:7890,streak:21,badges:24,colors:'#aab4c8,#8899b0'},
+  {rank:3,name:'Priya M.',avatar:'P',level:15,xp:5280,streak:18,badges:19,colors:'#c97d50,#b06030'},
+  {rank:4,name:'You',avatar:'A',level:12,xp:4820,streak:14,badges:18,colors:'#00e5ff,#2979ff',me:true},
+  {rank:5,name:'Jordan L.',avatar:'J',level:11,xp:4240,streak:9,badges:15,colors:'#7c3aed,#a855f7'},
+  {rank:6,name:'Chen W.',avatar:'C',level:10,xp:3980,streak:7,badges:13,colors:'#f472b6,#e879a0'},
+  {rank:7,name:'Aisha B.',avatar:'A',level:9,xp:3410,streak:5,badges:11,colors:'#00e676,#22d3ee'},
+  {rank:8,name:'Luis G.',avatar:'L',level:8,xp:2890,streak:3,badges:9,colors:'#ff6d00,#ffab00'},
+];
+function buildLeaderboard(){
+  const list=document.getElementById('lb-list');list.innerHTML='';
+  lbData.forEach(p=>{
+    const row=document.createElement('div');row.className='lb-row'+(p.me?' me':'');
+    const rnk=p.rank===1?'gold':p.rank===2?'silver':p.rank===3?'bronze':'';
+    const medal=p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':p.rank;
+    row.innerHTML=`<div class="lb-rank ${rnk}">${medal}</div>
+    <div class="lb-user"><div class="lb-avatar" style="background:linear-gradient(135deg,${p.colors})">${p.avatar}</div><div><div class="lb-uname">${p.name}${p.me?' (You)':''}</div><div class="lb-ulevel">Level ${p.level}</div></div></div>
+    <div class="lb-val xpv">${p.xp.toLocaleString()}</div>
+    <div class="lb-val stk">🔥 ${p.streak}</div>
+    <div class="lb-val bdg">🎖 ${p.badges}</div>`;
+    list.appendChild(row);
+  });
+  const sl=document.getElementById('streak-list');sl.innerHTML='';
+  lbData.slice(0,4).forEach(p=>{
+    const it=document.createElement('div');it.className='activity-item';
+    it.innerHTML=`<div class="ai-icon" style="background:linear-gradient(135deg,${p.colors});opacity:.8"><span style="font-size:15px">🔥</span></div><div class="ai-text"><div class="ai-title">${p.name}</div><div class="ai-sub">Level ${p.level}</div></div><div class="ai-xp" style="color:var(--orange)">${p.streak} days</div>`;
+    sl.appendChild(it);
+  });
+}
+
+/* Badges data */
+const BADGES=[
+  {icon:'🔥',name:'Streak Master',desc:'10-day learning streak',earned:true},
+  {icon:'⚡',name:'Speed Coder',desc:'Complete 5 timed quizzes',earned:true},
+  {icon:'🧠',name:'Quiz Champion',desc:'Score 100% three times',earned:true},
+  {icon:'🐍',name:'Python Pro',desc:'Master Python basics',earned:true},
+  {icon:'🌟',name:'Top 5%',desc:'Weekly leaderboard top 5%',earned:true},
+  {icon:'📚',name:'Bookworm',desc:'Complete 10 lessons in a day',earned:true},
+  {icon:'🎯',name:'Sharpshooter',desc:'9/10 average quiz score',earned:true},
+  {icon:'💎',name:'Gem Collector',desc:'Earn 5000 total XP',earned:true},
+  {icon:'🚀',name:'Rocket Start',desc:'Complete first course week',earned:true},
+  {icon:'👨‍💻',name:'Code Warrior',desc:'Level 12 achieved',earned:true},
+  {icon:'🌙',name:'Night Owl',desc:'Study after midnight 3x',earned:true},
+  {icon:'☀️',name:'Early Bird',desc:'Study before 7am 5x',earned:true},
+  {icon:'🏆',name:'Grand Champion',desc:'Reach #1 on global board',earned:false},
+  {icon:'💯',name:'Perfect Month',desc:'100% streak for 30 days',earned:false},
+  {icon:'🤖',name:'AI Whisperer',desc:'Chat with Nova 50 times',earned:false},
+  {icon:'🌍',name:'World Beater',desc:'Top 1% globally',earned:false},
+];
+function buildBadges(){
+  const earned=document.getElementById('earned-badges'),locked=document.getElementById('locked-badges');
+  earned.innerHTML='';locked.innerHTML='';
+  const pb=document.getElementById('profile-badges');pb.innerHTML='';
+  BADGES.forEach((b,i)=>{
+    const el=document.createElement('div');el.className='badge-item'+(b.earned?'':' locked');
+    el.innerHTML=`<div class="bi-icon">${b.icon}</div><div class="bi-name">${b.name}</div><div class="bi-desc">${b.desc}</div>`;
+    (b.earned?earned:locked).appendChild(el);
+    if(b.earned&&i<6){const p=document.createElement('div');p.className='badge-item';p.style.padding='12px';p.innerHTML=`<div style="font-size:24px;margin-bottom:6px">${b.icon}</div><div style="font-size:10px;font-weight:700">${b.name}</div>`;pb.appendChild(p)}
+  });
+}
+function buildHeatmap(){
+  const hm=document.getElementById('heatmap');hm.innerHTML='';
+  for(let i=0;i<35;i++){const c=document.createElement('div');const v=Math.floor(Math.random()*5);c.className=`hm-cell hm-${v}`;c.title=`${v===0?'No':v===1?'1-2':v===2?'3-5':v===3?'6-9':'10+'} sessions`;hm.appendChild(c)}
+}
+
+/* ════════════ QUIZ ENGINE ════════════ */
+const quizzes={
+  python:[
+    {q:'What does `len([1,2,3])` return?',opts:['2','3','4','Error'],ans:1,exp:'len() returns the number of items in a list. [1,2,3] has 3 items.'},
+    {q:'Which method adds an element to the end of a list?',opts:['add()','append()','push()','insert()'],ans:1,exp:'append() adds a single element to the end of the list.'},
+    {q:'What is the output of `type({})` ?',opts:["<class 'list'>"," <class 'dict'>","<class 'set'>","<class 'tuple'>"],ans:1,exp:'{} creates an empty dictionary in Python.'},
+    {q:'How do you create a set in Python?',opts:['[]','()','{}','set{}'],ans:2,exp:'Curly braces {} with no key-value pairs create a set (not a dict).'},
+    {q:'What does `dict.get("key", "default")` do?',opts:['Raises KeyError','Returns "key"','Returns value or default','Creates the key'],ans:2,exp:'get() safely returns the value or the default if key is missing.'},
+  ],
+  js:[
+    {q:'What does `typeof null` return in JavaScript?',opts:["'null'","'object'","'undefined'","'number'"],ans:1,exp:'This is a famous JS quirk — typeof null returns "object" due to a legacy bug.'},
+    {q:'Which creates a Promise that resolves immediately?',opts:['Promise.reject()','Promise.resolve()','new Promise()','async()'],ans:1,exp:'Promise.resolve(value) creates an already-resolved Promise.'},
+    {q:'What is the output of `[1,2,3].map(x => x*2)`?',opts:['[1,2,3]','[2,4,6]','6','undefined'],ans:1,exp:'map() transforms each element — multiplying by 2 gives [2,4,6].'},
+    {q:'What does `async/await` do?',opts:['Runs code in parallel','Makes synchronous code async','Syntax sugar for Promises','Creates new threads'],ans:2,exp:'async/await is syntactic sugar over Promises for cleaner async code.'},
+    {q:'Which method removes the last element of an array?',opts:['shift()','pop()','splice()','delete()'],ans:1,exp:'pop() removes and returns the last element of an array.'},
+  ],
+  ml:[
+    {q:'What does the learning rate control in gradient descent?',opts:['Number of epochs','Step size of weight updates','Model complexity','Data batch size'],ans:1,exp:'Learning rate controls how large each update step is during training.'},
+    {q:'Overfitting occurs when a model...',opts:['Trains too slowly','Performs well on train but poorly on test','Has too few parameters','Uses too little data'],ans:1,exp:'Overfitting means the model memorized training data but fails to generalize.'},
+    {q:'What is the purpose of a validation set?',opts:['To train the model','To tune hyperparameters','To test final performance','To augment data'],ans:1,exp:'Validation sets help tune hyperparameters without touching the test set.'},
+    {q:'Which activation function outputs values between 0 and 1?',opts:['ReLU','Tanh','Sigmoid','Linear'],ans:2,exp:'Sigmoid squashes any input to the range (0, 1).'},
+    {q:'What does L2 regularization penalize?',opts:['Large weights','Small weights','Negative weights','Zero weights'],ans:0,exp:'L2 (Ridge) adds a penalty for large weight values, reducing overfitting.'},
+  ],
+  react:[
+    {q:'What hook replaces componentDidMount in functional components?',opts:['useState','useRef','useEffect','useMemo'],ans:2,exp:'useEffect with an empty dependency array runs once after mount.'},
+    {q:'What does useState return?',opts:['Just the state','Just the setter','[state, setter]','An object'],ans:2,exp:'useState returns an array: [currentState, setterFunction].'},
+    {q:'What triggers a re-render in React?',opts:['Calling any function','State or props change','setTimeout','console.log'],ans:1,exp:'React re-renders when state or props change.'},
+    {q:'What is the purpose of useCallback?',opts:['Memoize a value','Memoize a function reference','Fetch data','Handle side effects'],ans:1,exp:'useCallback memoizes a function so it keeps the same reference between renders.'},
+    {q:'Which hook reads DOM nodes?',opts:['useState','useContext','useRef','useReducer'],ans:2,exp:'useRef provides a mutable ref object that can hold DOM nodes.'},
+  ],
+  algo:[
+    {q:'What is the time complexity of binary search?',opts:['O(n)','O(log n)','O(n²)','O(1)'],ans:1,exp:'Binary search halves the search space each step — O(log n).'},
+    {q:'Which sorting algorithm has best average case O(n log n)?',opts:['Bubble Sort','Insertion Sort','Quick Sort','Selection Sort'],ans:2,exp:'Quick Sort averages O(n log n) with good cache performance.'},
+    {q:'What does a hash table lookup cost?',opts:['O(n)','O(log n)','O(1) average','O(n²)'],ans:2,exp:'Hash tables provide O(1) average-case lookup with a good hash function.'},
+    {q:'Which data structure uses LIFO ordering?',opts:['Queue','Stack','Heap','Tree'],ans:1,exp:'Stack follows Last In, First Out — like a stack of plates.'},
+    {q:'What is space complexity of merge sort?',opts:['O(1)','O(log n)','O(n)','O(n log n)'],ans:2,exp:'Merge sort requires O(n) additional space for the temporary arrays.'},
+  ],
+  sql:[
+    {q:'Which SQL clause filters groups?',opts:['WHERE','FILTER','HAVING','GROUP'],ans:2,exp:'HAVING filters after GROUP BY, WHERE filters before grouping.'},
+    {q:'What does `SELECT DISTINCT` do?',opts:['Selects all rows','Removes duplicate rows','Sorts results','Counts unique values'],ans:1,exp:'DISTINCT eliminates duplicate rows from the result set.'},
+    {q:'Which JOIN returns all rows from both tables?',opts:['INNER JOIN','LEFT JOIN','FULL OUTER JOIN','CROSS JOIN'],ans:2,exp:'FULL OUTER JOIN returns all rows from both tables, with NULLs where no match.'},
+    {q:'What does `COUNT(*)` return?',opts:['Sum of values','Number of non-null values','Total rows','Distinct values'],ans:2,exp:'COUNT(*) counts all rows including those with NULL values.'},
+    {q:'Which keyword prevents duplicate entries?',opts:['UNIQUE','PRIMARY','DISTINCT','INDEX'],ans:0,exp:'A UNIQUE constraint ensures all values in a column are different.'},
+  ]
+};
+
+let quizState={questions:[],current:0,score:0,answered:false};
+
+function startQuiz(type){
+  const qs=quizzes[type]||quizzes.python;
+  quizState={questions:qs,current:0,score:0,answered:false};
+  document.getElementById('quiz-modal').classList.add('show');
+  renderQuestion();
+}
+function renderQuestion(){
+  const q=quizState.questions[quizState.current];
+  const total=quizState.questions.length;
+  const pct=((quizState.current)/total)*100;
+  document.getElementById('qpf').style.width=pct+'%';
+  document.getElementById('q-num').textContent=`Question ${quizState.current+1} of ${total}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-feedback').classList.remove('show','correct','wrong');
+  document.getElementById('q-next-btn').style.display='none';
+  document.getElementById('q-score-display').textContent=`Score: ${quizState.score}/${quizState.current}`;
+  quizState.answered=false;
+  const opts=document.getElementById('q-opts');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='quiz-opt';b.textContent=o;
+    b.onclick=()=>answerQuestion(i,b);opts.appendChild(b);
+  });
+}
+function answerQuestion(idx,btn){
+  if(quizState.answered)return;quizState.answered=true;
+  const q=quizState.questions[quizState.current];
+  const correct=idx===q.ans;
+  if(correct)quizState.score++;
+  document.querySelectorAll('.quiz-opt').forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===q.ans)b.classList.add('correct');
+    else if(i===idx&&!correct)b.classList.add('wrong');
+  });
+  const fb=document.getElementById('q-feedback');
+  fb.textContent=(correct?'✅ Correct! ':'❌ Incorrect. ')+q.exp;
+  fb.className='quiz-feedback show '+(correct?'correct':'wrong');
+  document.getElementById('q-score-display').textContent=`Score: ${quizState.score}/${quizState.current+1}`;
+  document.getElementById('q-next-btn').style.display='block';
+  document.getElementById('q-next-btn').textContent=quizState.current+1<quizState.questions.length?'Next →':'See Results →';
+}
+function nextQuestion(){
+  if(quizState.current+1>=quizState.questions.length){showQuizResults();return}
+  quizState.current++;renderQuestion();
+}
+function showQuizResults(){
+  const s=quizState.score,t=quizState.questions.length;
+  const pct=Math.round(s/t*100);
+  document.getElementById('qpf').style.width='100%';
+  document.getElementById('q-num').textContent='Quiz Complete! 🎉';
+  document.getElementById('q-text').textContent=`You scored ${s} out of ${t} (${pct}%)`;
+  document.getElementById('q-opts').innerHTML='';
+  const xp=pct>=80?100:pct>=60?60:30;
+  const fb=document.getElementById('q-feedback');
+  fb.innerHTML=`<strong>${pct>=80?'🏆 Excellent!':pct>=60?'👍 Good job!':'📚 Keep practicing!'}</strong><br>+${xp} XP earned • ${pct>=80?'Badge progress updated!':'Try again to earn more XP'}`;
+  fb.className='quiz-feedback show correct';
+  fb.style.background='#00e5ff0a';fb.style.borderColor='var(--cyan)';fb.style.color='var(--cyan)';
+  document.getElementById('q-next-btn').style.display='none';
+  document.getElementById('q-score-display').textContent=`Final: ${s}/${t}`;
+}
+function closeQuiz(){document.getElementById('quiz-modal').classList.remove('show')}
+
+/* ════════════ COURSERA REDIRECT ════════════ */
+function openCourse(url){window.open(url,'_blank','noopener')}
+
+/* ════════════════════════════════════════════
+   NOVA AI CHATBOT — Fully Local, No API Needed
+   Smart pattern-matching + rich knowledge base
+════════════════════════════════════════════ */
+let chatHistory=[];
+let isRecording=false;
+let voiceMode=false;
+let quizSession=null; // active inline quiz state
+
+const SUGGESTIONS=[
+  'Explain Python list comprehensions',
+  'Quiz me on JavaScript',
+  'What is Big-O notation?',
+  'Explain React hooks',
+  'What should I study next?',
+  'How does async/await work?',
+  'Give me a Python challenge',
+  'Explain machine learning basics'
+];
+
+/* ── KNOWLEDGE BASE ── */
+const KB = {
+
+  /* ── GREETINGS ── */
+  greet:{
+    patterns:[/^(hi|hello|hey|sup|yo|hiya|good\s*(morning|evening|afternoon)|start|begin|help)/i],
+    response:()=>`👋 Hey **${currentUser.name.split(' ')[0]}**! I'm **Nova**, your AI tutor.
+
+I can see your profile:
+- ⚡ **Level 12** (Code Warrior) · 4,820 XP
+- 🔥 **14-day streak** — keep it up!
+- 🏆 **Rank #4** globally
+- 💪 **Strong:** Python 92%, SQL 88%, React 81%
+- ⚠️ **Needs work:** Algorithms 67%, ML not started
+
+**What can I help you with?**
+- 📖 Explain any concept (Python, JS, React, ML, SQL, Algorithms…)
+- 🧠 Quiz you on any topic
+- 🎯 Give you a coding challenge
+- 📊 Analyse your progress
+- 💡 Answer any CS question
+
+Just ask! 🚀`
+  },
+
+  /* ── PROGRESS / ANALYTICS ── */
+  progress:{
+    patterns:[/progress|analytics|how am i doing|my stats|my level|assess|performance|weak|improve/i],
+    response:()=>`📊 **Your Learning Analytics**
+
+**Overall Standing:**
+- Level 12 · Code Warrior · #4 Global 🏆
+- 4,820 XP total · 14-day streak 🔥
+
+**Subject Breakdown:**
+| Subject | Quiz Avg | Status |
+|---------|----------|--------|
+| 🐍 Python | 92% | ✅ Advanced |
+| 🗄️ SQL | 88% | ✅ Strong |
+| ⚛️ React | 81% | ✅ Good |
+| ⚡ JavaScript | 78% | 🟡 Growing |
+| 🔢 Algorithms | 67% | ⚠️ Needs work |
+| 🤖 Machine Learning | 0% | 🔴 Not started |
+
+**🎯 AI Recommendation for this week:**
+1. Focus on **Algorithms** — 2 quizzes to push past 75%
+2. Start the **ML course** (just 30 min/day!)
+3. You need **460 XP** to reach #3 on the leaderboard — totally doable!
+
+Want me to quiz you on Algorithms right now? 💪`
+  },
+
+  /* ── WHAT TO STUDY ── */
+  studyplan:{
+    patterns:[/what should i study|study plan|what next|recommend|roadmap|schedule|plan/i],
+    response:()=>`📅 **Your Personalised Study Plan**
+
+**This Week (based on your gaps):**
+
+**Mon–Tue → Algorithms** ⚠️ Weak area
+- Review: Big-O notation, sorting algorithms
+- Do 2 algorithm quizzes (target: 75%+)
+- Estimated: +120 XP
+
+**Wed–Thu → Python** (maintain your 92%)
+- Finish lessons 19–22 in Python for Data Science
+- Practice pandas \`groupby\` and \`merge\`
+- Estimated: +90 XP
+
+**Fri → React + JavaScript**
+- Complete React Hooks deep-dive lesson
+- One JS async quiz
+- Estimated: +80 XP
+
+**Weekend → ML kickoff** 🆕
+- Start Machine Learning course — just intro
+- Watch first 2 lessons (30 min total)
+- Estimated: +50 XP
+
+**Total this week: ~+340 XP** → That puts you at 5,160 XP, enough to hit **Level 13** and potentially **#3 on the leaderboard!** 🏆
+
+Want to start with an Algorithms quiz now?`
+  },
+
+  /* ── PYTHON ── */
+  python:{
+    patterns:[/python|list comprehension|lambda|decorator|generator|pandas|numpy|dict(ionary)?|tuple|f.string|pip |virtualenv/i],
+    response:(msg)=>{
+      if(/list.?comp/i.test(msg)) return `**Python List Comprehensions** 🐍
+
+The most Pythonic way to build lists:
+
+\`\`\`python
+# ❌ Traditional (verbose)
+squares = []
+for x in range(10):
+    squares.append(x ** 2)
+
+# ✅ List comprehension (clean!)
+squares = [x**2 for x in range(10)]
+# → [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+# With a condition (filter)
+even_squares = [x**2 for x in range(10) if x % 2 == 0]
+# → [0, 4, 16, 36, 64]
+
+# Nested (2D grid)
+matrix = [[i*j for j in range(1,4)] for i in range(1,4)]
+# → [[1,2,3],[2,4,6],[3,6,9]]
+\`\`\`
+
+**Dict comprehensions** work the same way:
+\`\`\`python
+word_lengths = {word: len(word) for word in ['hello','world','python']}
+# → {'hello': 5, 'world': 5, 'python': 6}
+\`\`\`
+
+💡 **Rule of thumb:** If your loop just appends to a list, use a comprehension. If it has complex logic (try/except, multiple conditions), keep it a loop.
+
+Want a **challenge** to test this? Type "give me a Python challenge" 🎯 +20 XP`;
+
+      if(/lambda/i.test(msg)) return `**Python Lambda Functions** 🐍
+
+Lambdas are anonymous one-liner functions:
+
+\`\`\`python
+# Regular function
+def square(x):
+    return x ** 2
+
+# Lambda equivalent
+square = lambda x: x ** 2
+print(square(5))  # → 25
+
+# Most useful with map(), filter(), sorted()
+nums = [3, 1, 4, 1, 5, 9, 2, 6]
+
+# Sort list of dicts by a key
+students = [{'name':'Alice','score':88},{'name':'Bob','score':95}]
+students.sort(key=lambda s: s['score'], reverse=True)
+# → Bob (95) first
+
+# filter() with lambda
+evens = list(filter(lambda x: x % 2 == 0, nums))
+# → [4, 2, 6]
+
+# map() with lambda
+doubled = list(map(lambda x: x * 2, nums))
+\`\`\`
+
+⚠️ **Avoid** complex lambdas — if it doesn't fit one line cleanly, write a proper \`def\`. +15 XP for reading this!`;
+
+      if(/decorator/i.test(msg)) return `**Python Decorators** 🎀
+
+Decorators wrap a function to add behaviour without changing its code:
+
+\`\`\`python
+import time
+
+# A simple timing decorator
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__} took {end-start:.4f}s")
+        return result
+    return wrapper
+
+@timer  # ← This is sugar for: slow_func = timer(slow_func)
+def slow_func():
+    time.sleep(1)
+    return "done"
+
+slow_func()  # → "slow_func took 1.0012s"
+\`\`\`
+
+**Built-in decorators you must know:**
+- \`@property\` — turn a method into an attribute
+- \`@staticmethod\` — method that doesn't need \`self\`
+- \`@classmethod\` — method that receives the class, not instance
+- \`@functools.lru_cache\` — memoize expensive function calls
+
++25 XP for this advanced topic! 🔥`;
+
+      if(/generator/i.test(msg)) return `**Python Generators** ⚡
+
+Generators produce values one at a time using \`yield\` — memory-efficient for large data:
+
+\`\`\`python
+# Regular function — loads ALL into memory
+def get_squares(n):
+    return [x**2 for x in range(n)]  # stores full list
+
+# Generator function — produces ONE at a time
+def gen_squares(n):
+    for x in range(n):
+        yield x**2  # pauses here, resumes on next()
+
+# Use it
+for sq in gen_squares(1_000_000):  # only 1 number in memory!
+    print(sq)
+
+# Generator expression (like list comp but lazy)
+gen = (x**2 for x in range(10))
+print(next(gen))  # → 0
+print(next(gen))  # → 1
+\`\`\`
+
+**When to use:** processing large files, infinite sequences, pipelines.
+\`\`\`python
+# Reading a huge file line by line (memory efficient)
+def read_large_file(path):
+    with open(path) as f:
+        for line in f:
+            yield line.strip()
+\`\`\`
++30 XP! You're levelling up fast 🚀`;
+
+      // Generic Python response
+      return `**Python — Core Concepts** 🐍
+
+Since you're at **Level 8 in Python** (92% avg), here are some areas to keep sharp:
+
+**Data Structures:**
+\`\`\`python
+# List  — ordered, mutable
+nums = [1, 2, 3]
+nums.append(4); nums.pop()  # [1,2,3]
+
+# Tuple — ordered, immutable (faster!)
+point = (10, 20)
+
+# Dict  — key-value, O(1) lookup
+user = {'name': 'Alex', 'level': 12}
+user.get('age', 0)  # safe access → 0
+
+# Set   — unique values, O(1) membership
+tags = {'python', 'js', 'react'}
+'python' in tags  # → True
+\`\`\`
+
+**What specifically do you want to learn?**
+Try: "explain decorators", "explain generators", "explain list comprehensions", or "quiz me on Python" 🎯`;
+    }
+  },
+
+  /* ── JAVASCRIPT ── */
+  javascript:{
+    patterns:[/javascript|js |node\.?js|async.?await|promise|closure|hoisting|prototype|event.?loop|dom |arrow.?function|typeof|let.?const|destructur/i],
+    response:(msg)=>{
+      if(/async|await|promise/i.test(msg)) return `**JavaScript Async/Await & Promises** ⚡
+
+JavaScript is single-threaded. Async code lets it not block while waiting:
+
+\`\`\`javascript
+// ❌ Callback hell (old way)
+fetchUser(id, (user) => {
+  fetchPosts(user.id, (posts) => {
+    fetchComments(posts[0].id, (comments) => {
+      // deeply nested nightmare...
+    });
+  });
+});
+
+// ✅ Promises (cleaner)
+fetchUser(id)
+  .then(user => fetchPosts(user.id))
+  .then(posts => fetchComments(posts[0].id))
+  .catch(err => console.error(err));
+
+// ✅✅ Async/Await (best — reads like sync code!)
+async function loadData(id) {
+  try {
+    const user = await fetchUser(id);
+    const posts = await fetchPosts(user.id);
+    const comments = await fetchComments(posts[0].id);
+    return comments;
+  } catch (err) {
+    console.error('Failed:', err);
+  }
+}
+\`\`\`
+
+**Key rules:**
+- \`await\` only works inside an \`async\` function
+- \`await\` pauses that function but NOT the whole program
+- Always use \`try/catch\` with await
+- \`Promise.all([p1, p2, p3])\` runs promises in parallel ⚡
+
++40 XP for mastering this concept! 🏆`;
+
+      if(/closure/i.test(msg)) return `**JavaScript Closures** 🔒
+
+A closure is a function that remembers the variables from its outer scope even after the outer function has returned:
+
+\`\`\`javascript
+function makeCounter(start = 0) {
+  let count = start;  // ← this variable is "closed over"
+  
+  return {
+    increment: () => ++count,
+    decrement: () => --count,
+    value: () => count
+  };
+}
+
+const counter = makeCounter(10);
+counter.increment(); // 11
+counter.increment(); // 12
+counter.decrement(); // 11
+counter.value();     // 11
+// count is private — can't access it directly!
+\`\`\`
+
+**Real-world use: partial application**
+\`\`\`javascript
+function multiply(factor) {
+  return (number) => number * factor;  // closure!
+}
+const double = multiply(2);
+const triple = multiply(3);
+double(5); // 10
+triple(5); // 15
+\`\`\`
+
+Closures power: module patterns, memoization, event handlers, React hooks (useState is a closure!) +35 XP 🔥`;
+
+      if(/hoisting/i.test(msg)) return `**JavaScript Hoisting** 📤
+
+JavaScript moves declarations to the top of their scope before execution:
+
+\`\`\`javascript
+// VAR is hoisted (and initialised to undefined)
+console.log(name);  // → undefined (not an error!)
+var name = 'Alex';
+
+// LET/CONST are hoisted but NOT initialised → "Temporal Dead Zone"
+console.log(age);   // ❌ ReferenceError!
+let age = 12;
+
+// FUNCTION DECLARATIONS are fully hoisted
+sayHi();            // ✅ Works! → "Hi!"
+function sayHi() { console.log('Hi!'); }
+
+// FUNCTION EXPRESSIONS are NOT hoisted
+greet();            // ❌ TypeError: greet is not a function
+var greet = function() { console.log('Hello'); };
+\`\`\`
+
+**Best practice:** Always use \`const\`/\`let\`, declare variables at the top, use function declarations for functions you need everywhere. +20 XP!`;
+
+      if(/event.?loop/i.test(msg)) return `**The JavaScript Event Loop** 🔄
+
+JS is single-threaded but handles async via the event loop:
+
+\`\`\`
+Call Stack │ Web APIs │ Callback Queue │ Microtask Queue
+──────────────────────────────────────────────────────
+main()     │          │                │
+           │ setTimeout│               │
+           │          │ callback ←─────┤ (after stack empty)
+\`\`\`
+
+\`\`\`javascript
+console.log('1 - Start');
+
+setTimeout(() => console.log('3 - Timeout'), 0);
+
+Promise.resolve().then(() => console.log('2 - Promise'));
+
+console.log('4 - End');
+
+// Output order: 1, 4, 2, 3
+// Why? Microtasks (Promises) run BEFORE macrotasks (setTimeout)
+\`\`\`
+
+**Priority order:**
+1. **Call stack** (sync code) — runs first
+2. **Microtask queue** (Promises, queueMicrotask) — runs next
+3. **Macrotask queue** (setTimeout, setInterval, I/O) — runs last
+
++50 XP for understanding this — it's a top interview question! 🏆`;
+
+      return `**JavaScript — Core Concepts** ⚡
+
+You're at **78% quiz average** in JS — let's push to 85%+!
+
+**Topics you should know at your level:**
+- \`var\` vs \`let\` vs \`const\` (scoping rules)
+- Arrow functions vs regular functions (\`this\` binding!)
+- Destructuring: \`const {name, age} = user\`
+- Spread/rest: \`const copy = [...arr]\`
+- Modules: \`import/export\`
+- Array methods: \`map\`, \`filter\`, \`reduce\`, \`find\`
+
+**Quick example:**
+\`\`\`javascript
+const students = [
+  {name:'Alex', score:92},
+  {name:'Sam',  score:67},
+  {name:'Kim',  score:88}
+];
+
+// Get names of students scoring above 80, sorted
+const topStudents = students
+  .filter(s => s.score > 80)
+  .map(s => s.name)
+  .sort();
+// → ['Alex', 'Kim']
+\`\`\`
+
+Try asking: "explain closures", "explain the event loop", "explain async/await", or "quiz me on JavaScript" 🎯`;
+    }
+  },
+
+  /* ── REACT ── */
+  react:{
+    patterns:[/react|hooks?|usestate|useeffect|useref|usememo|usecallback|usecontext|component|jsx|props|state|re.?render|redux|context api|virtual dom/i],
+    response:(msg)=>{
+      if(/useeffect/i.test(msg)) return `**React useEffect** ⚛️
+
+\`useEffect\` runs side effects after render:
+
+\`\`\`jsx
+import { useState, useEffect } from 'react';
+
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Runs after every render where userId changes
+    setLoading(true);
+    fetch(\`/api/users/\${userId}\`)
+      .then(r => r.json())
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+      });
+
+    // Cleanup function (runs before next effect or unmount)
+    return () => {
+      // cancel requests, clear timers, etc.
+    };
+  }, [userId]);  // ← dependency array
+
+  if (loading) return <p>Loading...</p>;
+  return <h1>{user?.name}</h1>;
+}
+\`\`\`
+
+**Dependency array rules:**
+- \`[]\` — run once after mount (like componentDidMount)
+- \`[val]\` — run when val changes
+- no array — run after EVERY render (usually a bug!)
+
++35 XP — this is one of React's most important hooks! 🔥`;
+
+      if(/usestate/i.test(msg)) return `**React useState** ⚛️
+
+\`useState\` adds local state to functional components:
+
+\`\`\`jsx
+import { useState } from 'react';
+
+function Counter() {
+  // Returns [currentValue, setterFunction]
+  const [count, setCount] = useState(0);
+  const [user, setUser] = useState({ name: '', age: 0 });
+
+  // Simple update
+  const increment = () => setCount(count + 1);
+
+  // Functional update (safe for async/batched updates)
+  const safeIncrement = () => setCount(prev => prev + 1);
+
+  // Updating objects — must spread to keep other fields!
+  const updateName = (name) => setUser(prev => ({...prev, name}));
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={safeIncrement}>+1</button>
+    </div>
+  );
+}
+\`\`\`
+
+⚠️ **Common mistakes:**
+- Never mutate state directly: \`count++\` ❌, \`setCount(count+1)\` ✅
+- State updates are async — don't rely on value immediately after set
+- Objects/arrays must be replaced, not mutated
+
++25 XP! Keep going 💪`;
+
+      if(/virtual.?dom|reconcil/i.test(msg)) return `**React's Virtual DOM** 🔄
+
+The Virtual DOM is React's secret to fast UI updates:
+
+\`\`\`
+Real DOM (slow)        Virtual DOM (fast, in memory)
+─────────────────      ──────────────────────────────
+<div>                  JS object: {type:'div', props:{},
+  <h1>Hello</h1>  →     children:[{type:'h1',
+  <p>World</p>            children:['Hello']},...]}
+</div>
+\`\`\`
+
+**How it works:**
+1. State changes → React creates a new Virtual DOM tree
+2. **Diffing** — React compares new vs old Virtual DOM (O(n) algorithm)
+3. **Reconciliation** — Only the changed parts update the real DOM
+
+\`\`\`jsx
+// React knows ONLY the text changed — updates just that one text node
+function App() {
+  const [text, setText] = useState('Hello');
+  return <div><h1>{text}</h1><p>Static content</p></div>;
+  // Only h1's text node re-renders, not the whole div!
+}
+\`\`\`
+
+This is why React is fast — DOM operations are expensive, JS object comparisons are cheap. +30 XP! 🚀`;
+
+      return `**React — Hooks & Concepts** ⚛️
+
+At **81% avg**, you're doing well! Here's a hooks cheatsheet:
+
+\`\`\`jsx
+// State — remember data between renders
+const [count, setCount] = useState(0);
+
+// Side effects — fetch data, subscriptions, timers
+useEffect(() => { fetchData(); }, [dependency]);
+
+// Derived values — expensive calculations (memoised)
+const sorted = useMemo(() => items.sort(), [items]);
+
+// Stable function references (for passing to children)
+const handleClick = useCallback(() => doThing(), [dep]);
+
+// Direct DOM access / store mutable value without re-render
+const inputRef = useRef(null);
+
+// Shared state without prop drilling
+const theme = useContext(ThemeContext);
+\`\`\`
+
+**Component rules:**
+- Only call hooks at the **top level** (not inside loops/conditions)
+- Only call hooks in **React functions** (not regular JS)
+
+Ask me: "explain useEffect", "explain useState", "explain Virtual DOM", or "quiz me on React" 🎯`;
+    }
+  },
+
+  /* ── ALGORITHMS & DATA STRUCTURES ── */
+  algorithms:{
+    patterns:[/algorithm|big.?o|time.?complex|space.?complex|sort|binary.?search|hash.?table|linked.?list|tree|graph|recursion|dynamic.?program|stack|queue|heap|bfs|dfs|dijkstra|complexity/i],
+    response:(msg)=>{
+      if(/big.?o|time.?complex|o\(n\)|notation/i.test(msg)) return `**Big-O Notation** 📊 — Your #1 Weakness (67% → let's fix this!)
+
+Big-O describes how runtime/memory grows as input \`n\` grows:
+
+\`\`\`
+O(1)        Constant    — hash table lookup, array index
+O(log n)    Logarithmic — binary search, balanced BST
+O(n)        Linear      — loop through array once
+O(n log n)  Linearithmic— merge sort, heap sort
+O(n²)       Quadratic   — nested loops, bubble sort
+O(2ⁿ)       Exponential — recursive fib (naive)
+O(n!)       Factorial   — permutations
+\`\`\`
+
+\`\`\`python
+# O(1) — same speed regardless of input size
+def get_first(arr): return arr[0]
+
+# O(n) — scales linearly
+def find_max(arr):
+    max_val = arr[0]
+    for x in arr: max_val = max(x, max_val)
+    return max_val
+
+# O(n²) — nested loop = red flag!
+def bubble_sort(arr):
+    for i in range(len(arr)):
+        for j in range(len(arr)-i-1):  # nested!
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+
+# O(log n) — binary search (halves each step)
+def binary_search(arr, target):
+    lo, hi = 0, len(arr)-1
+    while lo <= hi:
+        mid = (lo+hi)//2
+        if arr[mid] == target: return mid
+        elif arr[mid] < target: lo = mid+1
+        else: hi = mid-1
+    return -1
+\`\`\`
+
+**Quick rule:** See nested loops? Think O(n²). See halving? Think O(log n). +50 XP — this will push your 67% → 80%! 🏆`;
+
+      if(/binary.?search/i.test(msg)) return `**Binary Search** 🔍 O(log n)
+
+Works on **sorted arrays** — eliminates half the search space each step:
+
+\`\`\`python
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if arr[mid] == target:
+            return mid           # ✅ Found!
+        elif arr[mid] < target:
+            left = mid + 1       # search right half
+        else:
+            right = mid - 1      # search left half
+    
+    return -1  # not found
+
+# Example
+arr = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+print(binary_search(arr, 13))  # → 6 (index)
+
+# With 1 billion elements: only ~30 steps!
+# vs linear search: up to 1,000,000,000 steps
+\`\`\`
+
+**Complexity:** Time O(log n) | Space O(1)
+
+**Template variations:**
+- Find first/last occurrence of duplicate
+- Find insertion position (\`bisect\` module in Python)
+- Search in rotated array (LC 33 — common interview question)
+
++40 XP! 🔥`;
+
+      if(/recursion|recursive/i.test(msg)) return `**Recursion** 🌀
+
+A function that calls itself, solving problems by breaking them into smaller sub-problems:
+
+\`\`\`python
+# Always needs: Base case + Recursive case
+
+def factorial(n):
+    if n <= 1: return 1        # base case — STOP here
+    return n * factorial(n-1)  # recursive case
+
+factorial(5)
+# 5 * factorial(4)
+#   4 * factorial(3)
+#     3 * factorial(2)
+#       2 * factorial(1)
+#         → 1
+# = 5*4*3*2*1 = 120
+
+# Fibonacci (naive O(2ⁿ) — bad!)
+def fib_slow(n):
+    if n <= 1: return n
+    return fib_slow(n-1) + fib_slow(n-2)
+
+# Fibonacci with memoisation O(n) — good!
+from functools import lru_cache
+@lru_cache(maxsize=None)
+def fib(n):
+    if n <= 1: return n
+    return fib(n-1) + fib(n-2)
+\`\`\`
+
+**When recursion shines:** trees, graphs, divide-and-conquer, backtracking
+**Watch out for:** stack overflow (no base case), repeated work (use memo!)
+
++35 XP! Now try: "explain dynamic programming" 🚀`;
+
+      if(/dynamic.?program|dp |memoiz/i.test(msg)) return `**Dynamic Programming** 🏗️
+
+DP = recursion + memoisation (top-down) or building up from smaller subproblems (bottom-up):
+
+\`\`\`python
+# Problem: Count ways to climb n stairs (1 or 2 steps at a time)
+
+# ❌ Naive recursion — O(2ⁿ) — extremely slow
+def climb_slow(n):
+    if n <= 1: return 1
+    return climb_slow(n-1) + climb_slow(n-2)
+
+# ✅ Top-down DP (memoisation) — O(n)
+def climb_memo(n, memo={}):
+    if n in memo: return memo[n]  # cached!
+    if n <= 1: return 1
+    memo[n] = climb_memo(n-1, memo) + climb_memo(n-2, memo)
+    return memo[n]
+
+# ✅ Bottom-up DP (tabulation) — O(n) time, O(1) space
+def climb(n):
+    if n <= 2: return n
+    prev2, prev1 = 1, 2
+    for _ in range(3, n+1):
+        prev2, prev1 = prev1, prev1 + prev2
+    return prev1
+
+print(climb(10))  # → 89
+\`\`\`
+
+**Classic DP problems:** Fibonacci, Knapsack, Longest Common Subsequence, Coin Change, Edit Distance
+
++60 XP — DP is an advanced topic, great job tackling it! 🏆`;
+
+      return `**Algorithms & Data Structures** 🔢
+
+This is your **weakest area (67%)** — let's fix it!
+
+**Most important concepts:**
+
+**Data Structures & their complexity:**
+\`\`\`
+Array    → O(1) access, O(n) search, O(n) insert
+Hash Map → O(1) avg search/insert/delete
+Stack    → O(1) push/pop (LIFO)
+Queue    → O(1) enqueue/dequeue (FIFO)
+BST      → O(log n) search/insert (balanced)
+Heap     → O(log n) insert, O(1) peek min/max
+\`\`\`
+
+**Top algorithms to know:**
+- Binary Search — O(log n)
+- Merge Sort / Quick Sort — O(n log n)
+- BFS / DFS — O(V+E) for graphs
+- Dynamic Programming (memoisation)
+
+**Ask me about any of these specifically:**
+"explain Big-O", "explain binary search", "explain recursion", "explain dynamic programming"
+
+Or type **"quiz me on algorithms"** to test yourself — you need it! 💪 +10 XP for reading`;
+    }
+  },
+
+  /* ── MACHINE LEARNING ── */
+  ml:{
+    patterns:[/machine.?learn|ml |ai |neural.?net|deep.?learn|gradient.?descent|overfitting|underfitting|training|model|accuracy|loss.?function|regression|classification|clustering|tensorflow|pytorch|scikit|feature|dataset/i],
+    response:(msg)=>{
+      if(/gradient.?descent/i.test(msg)) return `**Gradient Descent** 📉
+
+The optimisation algorithm that trains machine learning models:
+
+\`\`\`python
+# Concept: find the minimum of a loss function
+# by moving in the direction of steepest descent
+
+# Simple gradient descent (1D)
+def gradient_descent(start, learning_rate=0.1, epochs=100):
+    x = start
+    history = []
+    for _ in range(epochs):
+        gradient = 2 * x        # derivative of x² is 2x
+        x = x - learning_rate * gradient
+        history.append(x)
+    return x, history
+
+minimum, path = gradient_descent(start=10.0)
+print(f"Minimum found at: {minimum:.6f}")  # → ~0.0
+\`\`\`
+
+**Learning rate matters a lot:**
+- Too high → overshoots, diverges 💥
+- Too low → converges very slowly 🐢
+- Just right → smooth convergence ✅
+
+**Variants:**
+- **Batch GD** — uses all data per step (slow, stable)
+- **SGD** (Stochastic) — one sample per step (fast, noisy)
+- **Mini-batch** — small batch (best of both worlds) ✅
+- **Adam** — adaptive learning rates per parameter (most popular)
+
++45 XP! You're starting ML — that's Level 13 territory 🚀`;
+
+      if(/overfitting|underfitting|bias.?variance/i.test(msg)) return `**Overfitting & Underfitting** 🎯
+
+The central challenge of ML:
+
+\`\`\`
+Underfit          Just Right         Overfit
+─────────────────────────────────────────────
+Simple model      Good model         Complex model
+High bias         Low bias           Low bias
+Low variance      Low variance       High variance
+Bad train score   Good train score   Great train score
+Bad test score    Good test score    Bad test score
+
+Underfitting: model is too simple, misses patterns
+Overfitting:  model memorised training data, can't generalise
+\`\`\`
+
+**Fixes for overfitting:**
+\`\`\`python
+# 1. More training data (best fix)
+# 2. Regularisation (penalise complexity)
+from sklearn.linear_model import Ridge, Lasso
+model = Ridge(alpha=1.0)  # L2 regularisation
+
+# 3. Dropout (neural networks)
+import torch.nn as nn
+layer = nn.Dropout(p=0.5)  # randomly zeros 50% of neurons
+
+# 4. Cross-validation
+from sklearn.model_selection import cross_val_score
+scores = cross_val_score(model, X, y, cv=5)
+\`\`\`
+
++40 XP! This topic appears in almost every ML interview 🏆`;
+
+      return `**Machine Learning Basics** 🤖
+
+You haven't started ML yet — great time to begin! Here's the roadmap:
+
+**Core concepts:**
+- **Supervised Learning** — learn from labelled data (input → known output)
+  - Regression: predict numbers (house prices)
+  - Classification: predict categories (spam/not spam)
+- **Unsupervised Learning** — find patterns in unlabelled data
+  - Clustering (K-means), Dimensionality reduction (PCA)
+- **Reinforcement Learning** — learn from rewards/penalties
+
+      **ML Pipeline:**
+\`\`\`python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# 1. Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# 2. Preprocess
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 3. Train
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# 4. Evaluate
+preds = model.predict(X_test)
+print(accuracy_score(y_test, preds))
+\`\`\`
+
+**I recommend starting the Stanford ML course on Coursera** (linked in your Courses page)!
+
+Ask me: "explain gradient descent", "explain overfitting", or "quiz me on ML" 🎯`;
+    }
+  },
+
+  /* ── SQL ── */
+  sql:{
+    patterns:[/\bsql\b|query|select|join|group.?by|having|index|subquery|window.?function|aggregate|primary.?key|foreign.?key|normali[sz]/i],
+    response:(msg)=>{
+      if(/join/i.test(msg)) return `**SQL JOINs** 🗄️
+
+JOINs combine rows from two or more tables:
+
+\`\`\`sql
+-- Sample tables
+-- users:  id, name, dept_id
+-- depts:  id, dept_name
+
+-- INNER JOIN — only matching rows from BOTH tables
+SELECT u.name, d.dept_name
+FROM users u
+INNER JOIN depts d ON u.dept_id = d.id;
+
+-- LEFT JOIN — ALL users, even without a department
+SELECT u.name, d.dept_name
+FROM users u
+LEFT JOIN depts d ON u.dept_id = d.id;
+-- dept_name will be NULL if no match
+
+-- RIGHT JOIN — ALL depts, even empty ones
+-- FULL OUTER JOIN — all rows from both tables
+
+-- SELF JOIN — table joined with itself
+SELECT a.name AS employee, b.name AS manager
+FROM users a
+LEFT JOIN users b ON a.manager_id = b.id;
+\`\`\`
+
+**Quick rule:** Need all rows from left table? Use **LEFT JOIN**. Need only matched rows? Use **INNER JOIN**.
+
+At 88% SQL avg, you're strong here! +20 XP 💪`;
+
+      if(/window.?function|over\s*\(/i.test(msg)) return `**SQL Window Functions** 🪟
+
+Window functions perform calculations across rows related to the current row, without collapsing them:
+
+\`\`\`sql
+-- Rank students by score within each course
+SELECT 
+  name,
+  course,
+  score,
+  RANK() OVER (PARTITION BY course ORDER BY score DESC) AS rank,
+  DENSE_RANK() OVER (PARTITION BY course ORDER BY score DESC) AS dense_rank,
+  ROW_NUMBER() OVER (PARTITION BY course ORDER BY score DESC) AS row_num,
+  
+  -- Running total
+  SUM(score) OVER (PARTITION BY course ORDER BY score) AS running_total,
+  
+  -- Compare to previous row
+  LAG(score, 1) OVER (ORDER BY score) AS prev_score
+FROM student_scores;
+\`\`\`
+
+**RANK vs DENSE_RANK vs ROW_NUMBER:**
+- \`RANK()\` — ties get same rank, next rank skips (1,1,3)
+- \`DENSE_RANK()\` — ties get same rank, next rank doesn't skip (1,1,2)
+- \`ROW_NUMBER()\` — unique sequential numbers, no ties (1,2,3)
+
++50 XP — window functions are an advanced SQL skill! 🏆`;
+
+      return `**SQL Fundamentals** 🗄️
+
+You're at **88% avg** in SQL — one of your strongest subjects!
+
+**Core SQL cheatsheet:**
+\`\`\`sql
+-- SELECT with filtering, sorting, limiting
+SELECT name, score
+FROM students
+WHERE score > 80 AND course = 'Python'
+ORDER BY score DESC
+LIMIT 10;
+
+-- Aggregates
+SELECT course,
+  COUNT(*) AS total_students,
+  AVG(score) AS avg_score,
+  MAX(score) AS top_score
+FROM students
+GROUP BY course
+HAVING AVG(score) > 75;  -- filter on aggregates
+
+-- Subquery
+SELECT name FROM students
+WHERE score > (SELECT AVG(score) FROM students);
+
+-- Common table expression (CTE) — cleaner subqueries
+WITH avg_scores AS (
+  SELECT course, AVG(score) as avg_s FROM students GROUP BY course
+)
+SELECT s.name, s.score, a.avg_s
+FROM students s
+JOIN avg_scores a ON s.course = a.course
+WHERE s.score > a.avg_s;
+\`\`\`
+
+Ask me: "explain JOINs", "explain window functions", or "quiz me on SQL" 🎯`;
+    }
+  },
+
+  /* ── QUIZ MODE ── */
+  quiz:{
+    patterns:[/quiz me|test me|ask me|give me a quiz|quiz on|test on|practice questions?/i],
+    response:(msg)=>{
+      const topic = /python/i.test(msg)?'python':/javascript|js/i.test(msg)?'js':/react/i.test(msg)?'react':/algorithm|big.?o/i.test(msg)?'algo':/sql/i.test(msg)?'sql':/ml|machine/i.test(msg)?'ml':'random';
+      return startInlineQuiz(topic);
+    }
+  },
+
+  /* ── CHALLENGES ── */
+  challenge:{
+    patterns:[/challenge|coding.?problem|exercise|practice.?code|give me.*problem|solve/i],
+    response:(msg)=>{
+      const challenges=[
+        {title:'Python Dict Comprehension',desc:'Write a function that takes a list of words and returns a dict mapping each word to its length, but only for words longer than 3 characters.',example:'word_lengths(["hi","hello","code","python"]) → {"hello":5,"code":4,"python":6}',hint:'Use a dict comprehension with a condition: {k:v for k,v in ... if ...}',xp:80},
+        {title:'JavaScript Array Flatten',desc:'Write a function that deeply flattens a nested array without using Array.flat().',example:'flatten([1,[2,[3,[4]]],5]) → [1,2,3,4,5]',hint:'Use recursion — if element is an array, recurse into it; else push to result.',xp:90},
+        {title:'Python Two Sum',desc:'Given an array of integers and a target, return the indices of two numbers that add to the target. Solve in O(n) time.',example:'two_sum([2,7,11,15], 9) → [0,1]',hint:'Use a hash map. For each num, check if (target - num) is already in the map.',xp:100},
+        {title:'SQL Top Performers',desc:'Write a query to find the top 3 students by score in EACH course. Handle ties by including all tied students.',example:'Returns: course, student_name, score, rank (where rank <= 3)',hint:'Use DENSE_RANK() with PARTITION BY course ORDER BY score DESC, then WHERE rank <= 3',xp:110},
+        {title:'React useDebounce Hook',desc:'Build a custom useDebounce hook that delays updating a value until the user stops typing for 500ms.',example:'const debouncedSearch = useDebounce(searchTerm, 500);',hint:'Use useEffect with setTimeout and cleanup. Return a delayed version of the value.',xp:120},
+      ];
+      const c=challenges[Math.floor(Math.random()*challenges.length)];
+      return `🎯 **Coding Challenge: ${c.title}** (+${c.xp} XP)
+
+**Problem:**
+${c.desc}
+
+**Example:**
+\`${c.example}\`
+
+**Constraints:** Write clean, readable code. Aim for optimal time complexity.
+
+💡 **Hint** (try first before reading): ||${c.hint}||
+
+When you have a solution, share it and I'll review it! Or type "hint" if you need more guidance. 💪`;
+    }
+  },
+
+  /* ── LEADERBOARD / XP / GAMIFICATION ── */
+  leaderboard:{
+    patterns:[/leaderboard|rank|xp|points|badge|streak|level up|gamif|reward/i],
+    response:()=>`🏆 **Your Gamification Stats**
+
+**Current Rank: #4 Global** (out of 50,000+ students)
+
+**XP Breakdown:**
+- Total XP: **4,820** ⚡
+- Today: +120 XP
+- This week: +480 XP
+- Quizzes: 1,880 XP | Lessons: 2,940 XP
+
+**Level System:**
+\`\`\`
+Level 12: Code Warrior    ████████████░░░ 69% (4,820/5,600 XP)
+Level 13: Data Sage       → needs 780 more XP
+Level 14: Algorithm Ace   → needs 2,380 more XP
+Level 15: Full Stack Pro  → needs 4,180 more XP
+\`\`\`
+
+**Gap to climb leaderboard:**
+- 🥉 #3 Priya M. — 5,280 XP → **460 XP gap** (2–3 days!)
+- 🥈 #2 Marcus T. — 7,890 XP → 3,070 XP gap
+- 🥇 #1 Sarah K. — 8,420 XP → 3,600 XP gap
+
+**Your Badges: 18/32 earned** 🎖️
+Recent: 🔥 Streak Master, ⚡ Speed Coder, 🧠 Quiz Champion
+
+**Best ways to earn XP fast:**
+1. Perfect quiz score = +80–200 XP
+2. Daily streak bonus = +50 XP/day
+3. Complete a course lesson = +30 XP
+4. Coding challenge = +80–120 XP
+
+Want to earn XP right now? I'll quiz you! 🚀`
+  },
+
+  /* ── COURSES ── */
+  courses:{
+    patterns:[/course|enroll|coursera|what.*learn|curriculum|lesson|syllabus/i],
+    response:()=>`📚 **Your Courses on LearnHub**
+
+**Enrolled (in progress):**
+1. 🐍 **Python for Data Science** — 72% complete (IBM · Coursera)
+   - Next: Lesson 19 — Pandas groupby & merge
+2. ⚛️ **Front-End with React** — 45% complete (HK Univ · Coursera)
+   - Next: Lesson 10 — useReducer & Context
+3. 🤖 **Machine Learning** — 0% (Stanford · Coursera — not started!)
+
+**Recommended for your level (12):**
+- 🔢 **Algorithms Specialisation** — Stanford (fix your 67% weakness!)
+- 🗄️ **Advanced SQL** — UC Davis
+- 🧠 **Deep Learning** — Andrew Ng
+
+**Quick tip:** Go to the **Courses** section in the sidebar — every course card links directly to Coursera! 🎓
+
+Each completed lesson = **+30 XP**. Completing Python course alone = **~210 XP** remaining!`
+  },
+
+  /* ── GENERAL CS / CONCEPTS ── */
+  oop:{
+    patterns:[/oop|object.?oriented|class|inheritance|polymorphism|encapsulation|abstraction|interface|abstract/i],
+    response:()=>`**Object-Oriented Programming (OOP)** 🏗️
+
+The 4 pillars of OOP:
+
+\`\`\`python
+# ENCAPSULATION — bundle data + methods, hide internals
+class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.__balance = balance  # private (name mangling)
+    
+    def deposit(self, amount):
+        if amount > 0: self.__balance += amount
+    
+    def get_balance(self): return self.__balance
+
+# INHERITANCE — child class inherits from parent
+class SavingsAccount(BankAccount):
+    def __init__(self, owner, balance, interest_rate):
+        super().__init__(owner, balance)
+        self.interest_rate = interest_rate
+    
+    def add_interest(self):
+        self.deposit(self.get_balance() * self.interest_rate)
+
+# POLYMORPHISM — same interface, different behaviour
+class Animal:
+    def speak(self): raise NotImplementedError
+
+class Dog(Animal):
+    def speak(self): return "Woof!"
+
+class Cat(Animal):
+    def speak(self): return "Meow!"
+
+animals = [Dog(), Cat(), Dog()]
+for a in animals:
+    print(a.speak())  # same call, different result!
+
+# ABSTRACTION — hide complexity, expose only what's needed
+from abc import ABC, abstractmethod
+class Shape(ABC):
+    @abstractmethod
+    def area(self): pass
+
+class Circle(Shape):
+    def __init__(self, r): self.r = r
+    def area(self): return 3.14159 * self.r ** 2
+\`\`\`
+
++40 XP — OOP is fundamental for all your courses! 🔥`
+  },
+
+  /* ── DEFAULT / FALLBACK ── */
+  fallback:{
+    patterns:[/.*/],
+    response:(msg)=>{
+      const name=currentUser.name.split(' ')[0];
+      return `I heard you, **${name}**! Let me help with that.
+
+Based on your question about "${msg.length>40?msg.substring(0,40)+'...':msg}", here are some related topics I can explain in depth:
+
+**Programming Concepts:**
+- Type "explain [topic]" for any of: closures, recursion, Big-O, async/await, decorators, generators, virtual DOM, gradient descent, overfitting, SQL joins, window functions, OOP
+
+**Quick Actions:**
+- 🧠 **"Quiz me on [topic]"** — interactive quiz with XP rewards
+- 🎯 **"Give me a challenge"** — coding problem at your level
+- 📊 **"Show my progress"** — full analytics breakdown
+- 📅 **"Study plan"** — personalised weekly schedule
+
+**Topics you should focus on (based on your profile):**
+- **Algorithms** ⚠️ 67% — type "explain Big-O" or "quiz me on algorithms"
+- **Machine Learning** 🔴 not started — type "explain machine learning"
+
+What specifically can I help you learn? 🤖`;
+    }
+  }
+};
+
+/* ── INLINE QUIZ ENGINE ── */
+const inlineQuizzes={
+  python:[
+    {q:'What is the output of `[x**2 for x in range(5)]`?',opts:['[1,4,9,16,25]','[0,1,4,9,16]','[0,2,4,6,8]','Error'],ans:1,exp:'range(5) gives 0,1,2,3,4. Squaring each: 0,1,4,9,16.'},
+    {q:'Which is the correct way to create a tuple with one element?',opts:['(1)','(1,)','[1]','tuple{1}'],ans:1,exp:'A trailing comma makes it a tuple. (1) is just parentheses around an integer.'},
+    {q:'What does `dict.setdefault("key", [])` do if "key" doesn\'t exist?',opts:['Raises KeyError','Returns None','Creates key with value []','Returns []'],ans:2,exp:'setdefault() creates the key with the default value if it doesn\'t exist, then returns it.'},
+    {q:'What is the output of `bool("") and bool("hello")`?',opts:['True','False','"hello"','Error'],ans:1,exp:'Empty string "" is falsy. False and anything = False (short-circuit evaluation).'},
+    {q:'Which method removes and returns the last item of a list?',opts:['remove()','delete()','pop()','discard()'],ans:2,exp:'pop() with no argument removes and returns the last item. pop(i) removes index i.'},
+  ],
+  js:[
+    {q:'What does `typeof NaN` return?',opts:['"nan"','"undefined"','"number"','"object"'],ans:2,exp:'NaN (Not a Number) is ironically of type "number" in JavaScript!'},
+    {q:'What is the output of `0 == "0"`?',opts:['true','false','TypeError','undefined'],ans:0,exp:'== does type coercion. "0" is converted to 0, so 0 == 0 is true. Use === to avoid this!'},
+    {q:'Which creates a new array with doubled values?',opts:['[1,2,3].forEach(x=>x*2)','[1,2,3].map(x=>x*2)','[1,2,3].filter(x=>x*2)','[1,2,3].reduce(x=>x*2)'],ans:1,exp:'map() transforms each element and returns a new array. forEach() returns undefined.'},
+    {q:'What is a closure in JavaScript?',opts:['A way to close the browser','A function with access to its outer scope variables','A method to end loops','An error type'],ans:1,exp:'A closure is a function that retains access to variables from its lexical (outer) scope.'},
+    {q:'What does `const` guarantee?',opts:['The value cannot change','The reference cannot be reassigned','The variable is immutable','All of the above'],ans:1,exp:'const prevents reassignment of the variable binding, but the VALUE can still mutate (e.g. push to a const array).'},
+  ],
+  algo:[
+    {q:'What is the time complexity of accessing an element in a hash table?',opts:['O(n)','O(log n)','O(1)','O(n²)'],ans:2,exp:'Hash tables provide O(1) average-case lookup using a hash function to compute the index directly.'},
+    {q:'Binary search requires the input array to be...?',opts:['Sorted','Unsorted','All positive numbers','Unique elements'],ans:0,exp:'Binary search only works on sorted arrays. It eliminates half the search space each step.'},
+    {q:'Which sorting algorithm has O(n log n) average case?',opts:['Bubble Sort O(n²)','Insertion Sort O(n²)','Quick Sort O(n log n)','Selection Sort O(n²)'],ans:2,exp:'Quick Sort averages O(n log n) by partitioning around a pivot. Worst case is O(n²) on already-sorted data.'},
+    {q:'What data structure uses LIFO (Last In, First Out)?',opts:['Queue','Stack','Heap','LinkedList'],ans:1,exp:'A Stack is LIFO — the last item pushed is the first to be popped. Like a stack of plates.'},
+    {q:'What is the space complexity of merge sort?',opts:['O(1)','O(log n)','O(n)','O(n²)'],ans:2,exp:'Merge sort needs O(n) extra space for the temporary arrays used during merging.'},
+  ],
+  react:[
+    {q:'Which hook runs after every render by default?',opts:['useState','useRef','useEffect','useMemo'],ans:2,exp:'useEffect with no dependency array runs after every render. Add [] to run only on mount.'},
+    {q:'What does the dependency array `[]` in useEffect mean?',opts:['Run on every render','Run never','Run once after mount','Run only on unmount'],ans:2,exp:'An empty array [] means no dependencies — the effect runs exactly once after the initial mount.'},
+    {q:'What is wrong with: `const [count, setCount] = useState(0); count++`?',opts:['Nothing','count is read-only, mutating it breaks React','useState requires a string','count should be null'],ans:1,exp:'You must use setCount(count+1) to trigger a re-render. Direct mutation bypasses React\'s change detection.'},
+    {q:'What does key prop help React do?',opts:['Style elements','Track list items for efficient re-renders','Pass data to children','Define component names'],ans:1,exp:'The key prop helps React identify which items changed, were added, or removed in lists during reconciliation.'},
+    {q:'useMemo is used to...',opts:['Store DOM refs','Memoize expensive calculations','Handle side effects','Share state globally'],ans:1,exp:'useMemo caches the result of an expensive calculation and only recomputes it when dependencies change.'},
+  ],
+  sql:[
+    {q:'Which clause filters rows AFTER grouping?',opts:['WHERE','FILTER','HAVING','GROUP'],ans:2,exp:'HAVING filters aggregated groups. WHERE filters individual rows before grouping.'},
+    {q:'What does `LEFT JOIN` return?',opts:['Only matching rows','All rows from left table + matching from right','All rows from both tables','Only right table rows'],ans:1,exp:'LEFT JOIN returns all rows from the left table, with NULLs for unmatched right table columns.'},
+    {q:'Which is faster for lookups on large tables?',opts:['Full table scan','INDEX scan','DISTINCT query','Subquery'],ans:1,exp:'Indexes create a data structure (usually B-tree) that allows O(log n) lookups vs O(n) for full scans.'},
+    {q:'What does COUNT(*) count?',opts:['Only non-NULL values','Only numeric columns','All rows including NULLs','Distinct values only'],ans:2,exp:'COUNT(*) counts all rows. COUNT(column) counts non-NULL values in that column.'},
+    {q:'What is the output of: `SELECT 1 UNION SELECT 1`?',opts:['1, 1 (two rows)','1 (one row)','Error','NULL'],ans:1,exp:'UNION removes duplicates by default. Use UNION ALL to keep duplicates.'},
+  ],
+  ml:[
+    {q:'What does a high bias model indicate?',opts:['Overfitting','Underfitting','Good generalisation','High variance'],ans:1,exp:'High bias means the model is too simple — it underfits both training and test data (misses patterns).'},
+    {q:'What is the purpose of a training set?',opts:['Evaluate final model','Tune hyperparameters','Teach the model','Choose architecture'],ans:2,exp:'The training set is used to fit model parameters (weights). The model "learns" from this data.'},
+    {q:'Which activation function squashes output to (0,1)?',opts:['ReLU','Tanh','Sigmoid','Linear'],ans:2,exp:'Sigmoid: σ(x) = 1/(1+e^-x), outputs between 0 and 1. Great for binary classification.'},
+    {q:'What does "regularisation" do in ML?',opts:['Speeds up training','Adds noise to data','Penalises model complexity to reduce overfitting','Normalises input features'],ans:2,exp:'L1 (Lasso) and L2 (Ridge) regularisation add penalty terms that discourage overly large weights.'},
+    {q:'What is a validation set used for?',opts:['Training the model','Tuning hyperparameters','Final evaluation','Data augmentation'],ans:1,exp:'Validation set is used to tune hyperparameters (like learning rate, layers). Test set is for final evaluation only.'},
+  ],
+};
+
+function startInlineQuiz(topic){
+  const topics=['python','js','algo','react','sql','ml'];
+  const t=topics.includes(topic)?topic:topics[Math.floor(Math.random()*topics.length)];
+  const qs=inlineQuizzes[t];
+  quizSession={topic:t,questions:qs,current:0,score:0,total:qs.length};
+  const topicLabel={python:'Python🐍',js:'JavaScript⚡',algo:'Algorithms🔢',react:'React⚛️',sql:'SQL🗄️',ml:'Machine Learning🤖'}[t];
+  return `🧠 **Starting ${topicLabel} Quiz** — 5 questions, earn up to **+100 XP**!\n\n${renderQuizQuestion()}`;
+}
+
+function renderQuizQuestion(){
+  const qs=quizSession;
+  const q=qs.questions[qs.current];
+  return `**Q${qs.current+1}/${qs.total}:** ${q.q}\n\nA) ${q.opts[0]}\nB) ${q.opts[1]}\nC) ${q.opts[2]}\nD) ${q.opts[3]}\n\n_Type A, B, C, or D to answer_`;
+}
+
+function handleQuizAnswer(msg){
+  const letter=msg.trim().toUpperCase().match(/^[ABCD]/)?msg.trim().toUpperCase()[0]:null;
+  if(!letter) return null;
+  const map={A:0,B:1,C:2,D:3};
+  const idx=map[letter];
+  const qs=quizSession;
+  const q=qs.questions[qs.current];
+  const correct=idx===q.ans;
+  if(correct) qs.score++;
+  const feedback=correct?`✅ **Correct!** +${correct?20:0} XP\n\n📖 ${q.exp}`:`❌ **Incorrect.** The answer was **${['A','B','C','D'][q.ans]}) ${q.opts[q.ans]}**\n\n📖 ${q.exp}`;
+  qs.current++;
+  if(qs.current>=qs.total){
+    const xp=qs.score*20+(qs.score===qs.total?20:0);
+    const grade=qs.score>=4?'🏆 Excellent!':qs.score>=3?'👍 Good job!':'📚 Keep practising!';
+    const result=`${feedback}\n\n---\n\n🎉 **Quiz Complete!** ${grade}\n\n**Final Score: ${qs.score}/${qs.total}** · **+${xp} XP earned!**\n\n${qs.score<4?`💡 Try "explain ${qs.topic}" to strengthen the gaps, then quiz again!`:qs.score===5?'🔥 Perfect score! You\'re mastering this topic!':'Great work! Type "quiz me again" to keep practising!'}`;
+    quizSession=null;
+    return result;
+  }
+  return `${feedback}\n\n---\n\n${renderQuizQuestion()}`;
+}
+
+/* ── MAIN RESPONSE ENGINE ── */
+function getNovaResponse(msg){
+  // Active quiz session — check for answer first
+  if(quizSession){
+    const ans=handleQuizAnswer(msg);
+    if(ans) return ans;
+  }
+  // "quiz me again"
+  if(/quiz.*again|another.*quiz|retry/i.test(msg)){
+    return startInlineQuiz(quizSession?.topic||'random');
+  }
+  // Match knowledge base
+  for(const key of Object.keys(KB)){
+    if(key==='fallback') continue;
+    const entry=KB[key];
+    if(entry.patterns.some(p=>p.test(msg))){
+      return typeof entry.response==='function'?entry.response(msg):entry.response;
+    }
+  }
+  return KB.fallback.response(msg);
+}
+
+/* ── CHAT UI ── */
+function initChat(){
+  chatHistory=[];
+  quizSession=null;
+  document.getElementById('chat-messages').innerHTML='';
+  buildSuggestions();
+  const welcome=`👋 Hey **${currentUser.name.split(' ')[0]}**! I'm **Nova**, your AI tutor.
+
+I know your full profile: Level 12, 4,820 XP, 14-day streak, and I can see your **Algorithms score is 67%** — your biggest gap to fix!
+
+**I can help you with:**
+- 📖 **Explain** Python, JavaScript, React, SQL, Algorithms, ML
+- 🧠 **Interactive quizzes** — I ask questions and wait for YOUR answers
+- 🎯 **Coding challenges** at your exact skill level
+- 📊 **Progress analysis** and study recommendations
+
+**Try asking me:**
+_"Explain Big-O notation"_ · _"Quiz me on Python"_ · _"Give me a challenge"_ · _"What should I study next?"_
+
+What do you want to tackle first? 🚀`;
+  appendMsg('ai', welcome);
+}
+
+function buildSuggestions(){
+  const sc=document.getElementById('chat-suggestions');sc.innerHTML='';
+  SUGGESTIONS.forEach(s=>{
+    const c=document.createElement('button');c.className='suggest-chip';c.textContent=s;
+    c.onclick=()=>{document.getElementById('chat-input').value=s;sendChat()};
+    sc.appendChild(c);
+  });
+}
+
+function appendMsg(role,text){
+  const msgs=document.getElementById('chat-messages');
+  const wrap=document.createElement('div');wrap.className=`chat-msg ${role}`;
+  const av=document.createElement('div');av.className=`msg-avatar ${role==='ai'?'ai-av':'user-av'}`;
+  av.textContent=role==='ai'?'🤖':(currentUser.avatar||'U');
+  const bubble=document.createElement('div');bubble.className='msg-bubble';
+
+  let html=text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>`<div class="code-block"><span style="color:var(--text3);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px">${lang||'code'}</span>${code.trim()}</div>`)
+    .replace(/\|\|(.+?)\|\|/g,'<span style="background:var(--border);border-radius:4px;padding:1px 6px;cursor:pointer;color:var(--text3)" onclick="this.style.color=\'var(--text)\';this.style.background=\'var(--border2)\'">👁 Reveal hint</span>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code style="background:var(--border2);padding:2px 7px;border-radius:5px;font-family:var(--mono);font-size:11px;color:var(--cyan)">$1</code>')
+    .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:10px 0">')
+    .replace(/\n/g,'<br>');
+
+  bubble.innerHTML=html;
+  const time=document.createElement('div');time.className='msg-time';
+  time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const inner=document.createElement('div');
+  inner.appendChild(bubble);inner.appendChild(time);
+  if(role==='ai'){wrap.appendChild(av);wrap.appendChild(inner)}
+  else{wrap.appendChild(inner);wrap.appendChild(av)}
+  msgs.appendChild(wrap);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-input');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';inp.style.height='auto';
+  appendMsg('user',msg);
+
+  // Show typing
+  const msgs=document.getElementById('chat-messages');
+  const tw=document.createElement('div');tw.className='chat-msg ai';tw.id='tw';
+  const tav=document.createElement('div');tav.className='msg-avatar ai-av';tav.textContent='🤖';
+  const ind=document.createElement('div');ind.className='typing-indicator';
+  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='typing-dot';ind.appendChild(d)}
+  tw.appendChild(tav);tw.appendChild(ind);msgs.appendChild(tw);msgs.scrollTop=msgs.scrollHeight;
+
+  // Simulate thinking delay
+  const delay=600+Math.random()*600;
+  await new Promise(r=>setTimeout(r,delay));
+  const t=document.getElementById('tw');if(t)t.remove();
+
+  const resp=getNovaResponse(msg);
+  appendMsg('ai',resp);
+}
+
+function handleChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}
+function clearChat(){quizSession=null;initChat()}
+
+function toggleVoice(){
+  voiceMode=!voiceMode;
+  const btn=document.getElementById('voice-toggle-btn');
+  btn.textContent=voiceMode?'🔇 Voice Off':'🎙 Voice Mode';
+  btn.style.borderColor=voiceMode?'var(--cyan)':'';btn.style.color=voiceMode?'var(--cyan)':'';
+}
+
+function toggleRecording(){
+  const btn=document.getElementById('voice-btn');
+  isRecording=!isRecording;
+  if(isRecording){
+    btn.classList.add('recording');btn.title='Recording... click to stop';
+    if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      const recognition=new SR();
+      recognition.continuous=false;recognition.interimResults=false;recognition.lang='en-US';
+      recognition.onresult=e=>{document.getElementById('chat-input').value=e.results[0][0].transcript;isRecording=false;btn.classList.remove('recording')};
+      recognition.onerror=()=>{isRecording=false;btn.classList.remove('recording')};
+      recognition.onend=()=>{isRecording=false;btn.classList.remove('recording')};
+      recognition.start();
+    }else{
+      setTimeout(()=>{isRecording=false;btn.classList.remove('recording');appendMsg('ai','🎙 Voice input needs Chrome with microphone permission.')},1000);
+    }
+  }else{btn.classList.remove('recording');btn.title='Voice input'}
+}
+
+/* ════════════ PROFILE SAVE ════════════ */
+function saveProfile(){
+  const nm=document.getElementById('edit-name').value.trim();
+  const em=document.getElementById('edit-email').value.trim();
+  if(nm){
+    currentUser.name=nm;currentUser.email=em;
+    document.getElementById('profile-name-big').textContent=nm;
+    document.getElementById('profile-email-big').textContent=em;
+    document.getElementById('sb-name').textContent=nm;
+    document.getElementById('dash-name').textContent=nm.split(' ')[0];
+    const av=nm[0].toUpperCase();
+    currentUser.avatar=av;
+    document.getElementById('sb-avatar').textContent=av;
+    document.getElementById('profile-avatar-big').textContent=av;
+  }
+  const btn=document.querySelector('#page-profile .btn-main');
+  const orig=btn.textContent;btn.textContent='✅ Saved!';btn.style.background='linear-gradient(135deg,var(--green),#22d3ee)';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background=''},2000);
+}
+
+/* ════════════ REALTIME LEADERBOARD PULSE ════════════ */
+setInterval(()=>{
+  const rows=document.querySelectorAll('.lb-row');
+  if(!rows.length)return;
+  const idx=Math.floor(Math.random()*Math.min(rows.length,3));
+  rows[idx].style.transform='translateX(4px)';
+  rows[idx].style.borderColor='#00e5ff44';
+  setTimeout(()=>{rows[idx].style.transform='';rows[idx].style.borderColor=''},800);
+},4000);
+</script>
+</body>
+</html>
